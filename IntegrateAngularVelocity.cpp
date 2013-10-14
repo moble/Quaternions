@@ -8,11 +8,6 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_odeiv2.h>
-// Are these necessary?
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_eigen.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_cblas.h>
 
 #include "Quaternions.hpp"
 #include "IntegrateAngularVelocity.hpp"
