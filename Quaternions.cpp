@@ -517,26 +517,57 @@ std::vector<double> Quaternions::FrameFromAngularVelocity_Integrand(const std::v
   return (OmegaOver2 - rfrakHat*dot(rfrakHat,OmegaOver2))*(rfrakMag/std::tan(rfrakMag)) + rfrakHat*dot(rfrakHat,OmegaOver2) + cross(OmegaOver2,rfrak);
 }
 
+// /// Time-derivative of quaternion logarithm for vector with given angular velocity
+// std::vector<double> Quaternions::FrameFromAngularVelocity_Integrand(const std::vector<double>& rfrak,
+// 								    const std::vector<double>& Omega) {
+//   std::vector<double> rfrakDot(3);
+//   const double& rfrak_x = rfrak[0];
+//   const double& rfrak_y = rfrak[1];
+//   const double& rfrak_z = rfrak[2];
+//   double& rfrakDot_x = rfrakDot[0];
+//   double& rfrakDot_y = rfrakDot[1];
+//   double& rfrakDot_z = rfrakDot[2];
+//   const double rfrakMag = std::sqrt(rfrak_x*rfrak_x+rfrak_y*rfrak_y+rfrak_z*rfrak_z);
+//   const double OmegaMag = std::sqrt(Omega[0]*Omega[0]+Omega[1]*Omega[1]+Omega[2]*Omega[2]);
+//   if(rfrakMag < Quaternion_Epsilon * OmegaMag) { // If the matrix is really close to the identity, return
+//     rfrakDot_x = Omega[0]/2.0;
+//     rfrakDot_y = Omega[1]/2.0;
+//     rfrakDot_z = Omega[2]/2.0;
+//     return rfrakDot;
+//   }
+//   if(std::abs(std::sin(rfrakMag)) < Quaternion_Epsilon) { // If the matrix is really close to singular, it's equivalent to the identity, so return
+//     rfrakDot_x = Omega[0]/2.0;
+//     rfrakDot_y = Omega[1]/2.0;
+//     rfrakDot_z = Omega[2]/2.0;
+//     return rfrakDot;
+//   }
+//   const double dotTerm = (rfrak_x*Omega[0]+rfrak_y*Omega[1]+rfrak_z*Omega[2])/(rfrakMag*rfrakMag);
+//   const double cotTerm = rfrakMag/(2*tan(rfrakMag));
+//   rfrakDot_x = (Omega[0] - rfrak_x*dotTerm)*cotTerm + rfrak_x*dotTerm/2. - 0.5*Omega[2]*rfrak_y + 0.5*Omega[1]*rfrak_z;
+//   rfrakDot_y = (Omega[1] - rfrak_y*dotTerm)*cotTerm + rfrak_y*dotTerm/2. + 0.5*Omega[2]*rfrak_x - 0.5*Omega[0]*rfrak_z;
+//   rfrakDot_z = (Omega[2] - rfrak_z*dotTerm)*cotTerm + rfrak_z*dotTerm/2. - 0.5*Omega[1]*rfrak_x + 0.5*Omega[0]*rfrak_y;
+//   return rfrakDot;
+// }
+
 /// Time-derivative of 2-D quaternion logarithm for vector with given angular velocity
 void Quaternions::FrameFromAngularVelocity_2D_Integrand(const double rfrak_x, const double rfrak_y,
-							const std::vector<double>& Omega,
+							std::vector<double> Omega,
 							double& rfrakDot_x, double& rfrakDot_y) {
   const double rfrakMag = std::sqrt(rfrak_x*rfrak_x+rfrak_y*rfrak_y);
-  const double OmegaMag = std::sqrt(Omega[0]*Omega[0]+Omega[1]*Omega[1]+Omega[2]*Omega[2]);
-  if(rfrakMag < Quaternion_Epsilon * OmegaMag) { // If the matrix is really close to the identity, return
-    rfrakDot_x = Omega[0]/2.0;
-    rfrakDot_y = Omega[1]/2.0;
-    return;
-  }
   if(std::abs(std::sin(rfrakMag)) < Quaternion_Epsilon) { // If the matrix is really close to singular, it's equivalent to the identity, so return
     rfrakDot_x = Omega[0]/2.0;
     rfrakDot_y = Omega[1]/2.0;
     return;
   }
+  // sfrakHat = {-rfrak_y/rfrakMag, rfrak_x/rfrakMag, 0.0};
+  const double Omega_S = (Omega[0]*(-rfrak_y/rfrakMag)+Omega[1]*(rfrak_x/rfrakMag))*std::tan(rfrakMag)-Omega[2];
+  Omega[0] += -Omega_S*std::sin(2*rfrakMag)*(-rfrak_y/rfrakMag);
+  Omega[1] += -Omega_S*std::sin(2*rfrakMag)*(rfrak_x/rfrakMag);
+  Omega[2] +=  Omega_S*std::cos(2*rfrakMag);
   const double dotTerm = (rfrak_x*Omega[0]+rfrak_y*Omega[1])/(rfrakMag*rfrakMag);
   const double cotTerm = rfrakMag/(2*tan(rfrakMag));
-  rfrakDot_x = (Omega[0] - rfrak_x*dotTerm)*cotTerm + rfrak_x*dotTerm - 0.5*Omega[2]*rfrak_y;
-  rfrakDot_y = (Omega[1] - rfrak_y*dotTerm)*cotTerm + rfrak_y*dotTerm + 0.5*Omega[2]*rfrak_x;
+  rfrakDot_x = (Omega[0] - rfrak_x*dotTerm)*cotTerm + rfrak_x*dotTerm/2. - 0.5*Omega[2]*rfrak_y;
+  rfrakDot_y = (Omega[1] - rfrak_y*dotTerm)*cotTerm + rfrak_y*dotTerm/2. + 0.5*Omega[2]*rfrak_x;
   return;
 }
 

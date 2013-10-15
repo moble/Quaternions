@@ -13,7 +13,7 @@ namespace Quaternions {
 
   std::vector<Quaternion> FrameFromAngularVelocity(const std::vector<Quaternion>& Omega, const std::vector<double>& T);
 
-  // std::vector<Quaternion> FrameFromAngularVelocity_2D(const std::vector<Quaternion>& Omega, const std::vector<double>& T);
+  std::vector<Quaternion> FrameFromAngularVelocity_2D(const std::vector<Quaternion>& Omega, const std::vector<double>& T);
 
 } // namespace Quaternions
 
