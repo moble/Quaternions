@@ -205,26 +205,27 @@ void Quaternions::FrameFromAngularVelocity(OmegaFunc Omega, const double t0, con
   /// "unflip" the signs when returning.
 
   // Set up the integrator
+  const double epsabs = 1.e-12;
+  const double epsrel = 1.e-12;
   const unsigned int MaxSteps = 10000000; // This is a hard upper limit
   const double hmin = (t1-t0)/double(MaxSteps);
   const double hmax = (t1-t0)/100.;
-  const double hstart = (t1-t0)/10000.;
-  const double epsabs = 1.e-12;
-  const double epsrel = 1.e-12;
+  double h = hmax/10.;
   const gsl_odeiv2_step_type* T = gsl_odeiv2_step_rk8pd;
   gsl_odeiv2_step* s = gsl_odeiv2_step_alloc(T, 3);
   gsl_odeiv2_control* c = gsl_odeiv2_control_y_new(epsabs, epsrel);
   gsl_odeiv2_evolve* e = gsl_odeiv2_evolve_alloc(3);
   gsl_odeiv2_system sys = {FrameFromAngularVelocity_RHS_p, NULL, 3, (void *) Omega};
-  double h = hstart;
   double t = t0;
   double r[3] = {0.0, 0.0, 0.0};
 
   // Run the integration
   vector<vector<double> > rs;
-  vector<double> ts;
+  Ts = vector<double>(0);
+  rs.reserve(200000);
+  Ts.reserve(200000);
   rs.push_back(vector<double>(r, r+3));
-  ts.push_back(t);
+  Ts.push_back(t);
   unsigned int NSteps = 0; // Total number of steps
   unsigned int nSteps = 0; // Number of steps since last change
   while (t < t1) {
@@ -237,7 +238,7 @@ void Quaternions::FrameFromAngularVelocity(OmegaFunc Omega, const double t0, con
       throw(FailedGSLCall);
     }
     rs.push_back(vector<double>(r, r+3));
-    ts.push_back(t);
+    Ts.push_back(t);
 
     // Check if we should stop because there have been too many steps
     if(NSteps>MaxSteps) {
@@ -247,7 +248,7 @@ void Quaternions::FrameFromAngularVelocity(OmegaFunc Omega, const double t0, con
 
     // Check if we should stop because the step has gotten too small,
     // but make sure we at least take 10 steps since the start.
-    if(nSteps>10 && h<hmin) {
+    if(nSteps>20 && h<hmin) {
       std::cerr << "Step size " << h << " too small.  Breaking out before we are finished." << std::endl;
       break;
     }
@@ -268,7 +269,7 @@ void Quaternions::FrameFromAngularVelocity(OmegaFunc Omega, const double t0, con
   gsl_odeiv2_step_free(s);
 
   Qs = UnflipRotors(exp(QuaternionArray(rs)));
-  Ts = ts;
+  return;
 }
 
 

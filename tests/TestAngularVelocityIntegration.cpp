@@ -43,16 +43,17 @@ int main() {
   vector<double> Ts;
   cout << setprecision(16);
   FrameFromAngularVelocity(&Omega, T_i, T_f, Qs, Ts);
-  for(unsigned int i=0; i<Ts.size(); ++i) {
-    cout << Ts[i]
-  	 // << "\n\t" << Qs[i]
-  	 // << "\t" << Qs[i].angle()
-  	 // << "\n\t" << R_1func(Ts[i])
-  	 // << "\n\t" << Qs[i]-R_1func(Ts[i])
-  	 << "\t" << (Qs[i]-R_1func(Ts[i])).abs()
-  	 // << "\t" << 1.e-14*std::sqrt(i)
-  	 << endl;
-  }
+  // for(unsigned int i=0; i<Ts.size(); ++i) {
+  //   cout << Ts[i]
+  // 	 // << "\n\t" << Qs[i]
+  // 	 // << "\t" << Qs[i].angle()
+  // 	 // << "\n\t" << R_1func(Ts[i])
+  // 	 // << "\n\t" << Qs[i]-R_1func(Ts[i])
+  // 	 << "\t" << (Qs[i]-R_1func(Ts[i])).abs()
+  // 	 // << "\t" << 1.e-14*std::sqrt(i)
+  // 	 << endl;
+  // }
+  cout << "Took " << Ts.size() << " steps." << endl;
 
   return 0;
 }
