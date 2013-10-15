@@ -65,6 +65,18 @@ std::vector<Quaternion> Quaternions::FrameFromAngularVelocity(const std::vector<
   /// Note that each element of Omega should be a pure-vector
   /// Quaternion, corresponding to the angular-velocity vector at the
   /// instant of time.
+  ///
+  /// This function is not as accurate as might be hoped, because the
+  /// time step of the input data is not adjustable, so you can't do
+  /// anything like "adaptive" integration.  If you have a function
+  /// that returns Omega given time, you should use the other version
+  /// of this (overloaded) function that uses such a function.
+  /// Alternatively, if you are doing an integration as part of a
+  /// larger system, you can use the code for the other version of
+  /// this function as a guide on how to do so.
+  ///
+  /// \sa FrameFromAngularVelocity(std::vector<double> (* Omega)(const double t), const double t0, const double t1, std::vector<Quaternion>& Qs, std::vector<double>& Ts)
+
   const vector<double> OmegaX = Quaternions::Component1(Omega);
   const vector<double> OmegaY = Quaternions::Component2(Omega);
   const vector<double> OmegaZ = Quaternions::Component3(Omega);
@@ -160,6 +172,37 @@ void Quaternions::FrameFromAngularVelocity(OmegaFunc Omega, const double t0, con
   /// \param t1 Final time
   /// \param R0 Initial frame
   ///
+  /// This function takes a function pointer `Omega` (which returns a
+  /// 3-vector, given the time) and integrates to find the frame with
+  /// that angular velocity.
+  ///
+  /// This function may not be very useful in general, because the
+  /// angular velocity may not be known as a function of time.
+  /// However, there are situations where the angular velocity is
+  /// known at an instant of time, given other information.  The code
+  /// for this function should serve as a useful guide when
+  /// implementing such integrations.
+  ///
+  /// In particular, the key piece in this integration is to reset the
+  /// value of the quaternion logarithm (denoted below as `r`) between
+  /// integration steps when the magnitude of `r` is too large.  It
+  /// gets reset to a value that is identical in terms of the
+  /// resulting rotation, but has a smaller magnitude, so that the
+  /// final result doesn't wander too much.  This is equivalent to
+  /// changing branches of a complex logarithm.
+  ///
+  /// There are two important things to note about this resetting
+  /// procedure.  First, the time stepper may want to take a very
+  /// small step immediately after the reset, and should not be cause
+  /// for alarm.  Below, this is dealt with by also restting `nSteps`,
+  /// and making sure that we take at least 10 more steps after that
+  /// to let the time stepper adjust its step sizes accordingly.
+  ///
+  /// Second, the resulting rotor (which is the exponential of the
+  /// logarithm) will flip signs when the logarithm is reset.  This
+  /// will have no effect on the physical frame deduced from the
+  /// rotor, but could be bad news for interpolations.  So we simply
+  /// "unflip" the signs when returning.
 
   // Set up the integrator
   const unsigned int MaxSteps = 10000000; // This is a hard upper limit
