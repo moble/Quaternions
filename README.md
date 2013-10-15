@@ -23,11 +23,14 @@ This main library is fairly simple, and should be trivial to compile;
 only the header `Quaternions.hpp` needs to be included, and only the
 file `Quaternions.cpp` needs to be compiled.
 
-The second pair of files, `IntegrateAngularVelocity.{c,h}pp` contains
-just one function, but depends on the GNU Scientific Library (GSL) for
+The second pair of files, `IntegrateAngularVelocity.{c,h}pp` contain
+just two functions, but depend on the GNU Scientific Library (GSL) for
 interpolation and ODE integration.  So GSL must be installed
 separately, compiled as a shared library, and the `-I` and `-L` flags
 variables set appropriately on whatever compilation is done.
+
+An example of how to use this code as a library in other code (and a
+working Makefile) is given in the `tests` directory.
 
 For python, compilation is done automatically, and assumes the
 presence of GSL.  However, if desired, this dependency can be removed
