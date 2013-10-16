@@ -27,6 +27,10 @@ using std::vector;
 #define FailedGSLCall 6
 
 
+typedef vector<double> (*OmegaFunc)(const double);
+
+
+
 #ifndef DOXYGEN
 typedef struct {
   gsl_interp_accel* accX;
@@ -149,7 +153,6 @@ std::vector<Quaternion> Quaternions::FrameFromAngularVelocity(const std::vector<
 }
 
 
-typedef vector<double> (*OmegaFunc)(const double);
 int FrameFromAngularVelocity_RHS_p(double t, const double ri[], double drdt[], void* Omega) {
   // Pack some values
   vector<double> rfrak(3);
@@ -208,7 +211,7 @@ void Quaternions::FrameFromAngularVelocity(OmegaFunc Omega, const double t0, con
   const double epsabs = 1.e-12;
   const double epsrel = 1.e-12;
   const unsigned int MaxSteps = 10000000; // This is a hard upper limit
-  const double hmin = (t1-t0)/double(MaxSteps);
+  const double hmin = (t1-t0)/double(100*MaxSteps);
   const double hmax = (t1-t0)/100.;
   double h = hmax/10.;
   const gsl_odeiv2_step_type* T = gsl_odeiv2_step_rk8pd;
@@ -247,8 +250,8 @@ void Quaternions::FrameFromAngularVelocity(OmegaFunc Omega, const double t0, con
     }
 
     // Check if we should stop because the step has gotten too small,
-    // but make sure we at least take 10 steps since the start.
-    if(nSteps>20 && h<hmin) {
+    // but make sure we at least take 500 steps since the start.
+    if(nSteps>500 && h<hmin) {
       std::cerr << "Step size " << h << " too small.  Breaking out before we are finished." << std::endl;
       break;
     }
@@ -377,4 +380,121 @@ std::vector<Quaternion> Quaternions::FrameFromAngularVelocity_2D(const std::vect
   gsl_odeiv2_driver_free(d);
 
   return UnflipRotors(exp(QuaternionArray(rs)));
+}
+
+
+int FrameFromAngularVelocity_2D_RHS_p(double t, const double ri[], double drdt[], void* Omega) {
+  // Evaluate the RHS
+  Quaternions::FrameFromAngularVelocity_2D_Integrand(ri[0], ri[1], ((OmegaFunc) Omega)(t), drdt[0], drdt[1]);
+  // GSL wants to hear that everything went okay
+  return GSL_SUCCESS;
+}
+/// Find the frame with the given angular velocity function
+void Quaternions::FrameFromAngularVelocity_2D(OmegaFunc Omega, const double t0, const double t1, std::vector<Quaternion>& Qs, std::vector<double>& Ts) {
+  ///
+  /// \param Omega Function pointer returning angular velocity
+  /// \param t0 Initial time
+  /// \param t1 Final time
+  /// \param R0 Initial frame
+  ///
+  /// This function takes a function pointer `Omega` (which returns a
+  /// 3-vector, given the time) and integrates to find the frame with
+  /// that angular velocity.
+  ///
+  /// This function may not be very useful in general, because the
+  /// angular velocity may not be known as a function of time.
+  /// However, there are situations where the angular velocity is
+  /// known at an instant of time, given other information.  The code
+  /// for this function should serve as a useful guide when
+  /// implementing such integrations.
+  ///
+  /// In particular, the key piece in this integration is to reset the
+  /// value of the quaternion logarithm (denoted below as `r`) between
+  /// integration steps when the magnitude of `r` is too large.  It
+  /// gets reset to a value that is identical in terms of the
+  /// resulting rotation, but has a smaller magnitude, so that the
+  /// final result doesn't wander too much.  This is equivalent to
+  /// changing branches of a complex logarithm.
+  ///
+  /// There are two important things to note about this resetting
+  /// procedure.  First, the time stepper may want to take a very
+  /// small step immediately after the reset, and should not be cause
+  /// for alarm.  Below, this is dealt with by also restting `nSteps`,
+  /// and making sure that we take at least 10 more steps after that
+  /// to let the time stepper adjust its step sizes accordingly.
+  ///
+  /// Second, the resulting rotor (which is the exponential of the
+  /// logarithm) will flip signs when the logarithm is reset.  This
+  /// will have no effect on the physical frame deduced from the
+  /// rotor, but could be bad news for interpolations.  So we simply
+  /// "unflip" the signs when returning.
+
+  // Set up the integrator
+  const double epsabs = 1.e-10;
+  const double epsrel = 1.e-10;
+  const unsigned int MaxSteps = 10000000; // This is a hard upper limit
+  const double hmin = (t1-t0)/(100*double(MaxSteps));
+  const double hmax = (t1-t0)/100.;
+  double h = hmax/10.;
+  const gsl_odeiv2_step_type* T = gsl_odeiv2_step_rk8pd;
+  gsl_odeiv2_step* s = gsl_odeiv2_step_alloc(T, 3);
+  gsl_odeiv2_control* c = gsl_odeiv2_control_y_new(epsabs, epsrel);
+  gsl_odeiv2_evolve* e = gsl_odeiv2_evolve_alloc(3);
+  gsl_odeiv2_system sys = {FrameFromAngularVelocity_2D_RHS_p, NULL, 3, (void *) Omega};
+  double t = t0;
+  double r[3] = {0.0, 0.0, 0.0};
+
+  // Run the integration
+  Qs.clear();
+  Ts.clear();
+  vector<vector<double> > rs;
+  Ts = vector<double>(0);
+  rs.reserve(200000);
+  Ts.reserve(200000);
+  rs.push_back(vector<double>(r, r+3));
+  Ts.push_back(t);
+  unsigned int NSteps = 0; // Total number of steps
+  unsigned int nSteps = 0; // Number of steps since last change
+  while (t < t1) {
+    // Take a step
+    int status = gsl_odeiv2_evolve_apply(e, c, s, &sys, &t, t+hmax, &h, r);
+    ++NSteps;
+    ++nSteps;
+    if(status != GSL_SUCCESS) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": gsl_odeiv2_driver_apply returned an error; return value=" << status << "\n" << std::endl;
+      throw(FailedGSLCall);
+    }
+    rs.push_back(vector<double>(r, r+3));
+    Ts.push_back(t);
+
+    // Check if we should stop because there have been too many steps
+    if(NSteps>MaxSteps) {
+      std::cerr << "\n\nThe integration has taken " << NSteps << ".  This seems excessive, so we'll stop." << std::endl;
+      break;
+    }
+
+    // Check if we should stop because the step has gotten too small,
+    // but make sure we at least take 500 steps since the start.
+    if(nSteps>500 && h<hmin) {
+      std::cerr << "Step size " << h << " too small.  Breaking out before we are finished." << std::endl;
+      break;
+    }
+
+    // Reset the value of r if necessary
+    const double absquatlogR = std::sqrt(r[0]*r[0]+r[1]*r[1]+r[2]*r[2]);
+    if(absquatlogR>M_PI/2.) {
+      r[0] = (absquatlogR-M_PI)*r[0]/absquatlogR;
+      r[1] = (absquatlogR-M_PI)*r[1]/absquatlogR;
+      r[2] = (absquatlogR-M_PI)*r[2]/absquatlogR;
+      nSteps=0; // This may make the integrator take a few small steps at first
+    }
+  }
+
+  // Free the gsl storage
+  gsl_odeiv2_evolve_free(e);
+  gsl_odeiv2_control_free(c);
+  gsl_odeiv2_step_free(s);
+
+  Qs = UnflipRotors(exp(QuaternionArray(rs)));
+  return;
 }

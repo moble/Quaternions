@@ -42,18 +42,21 @@ int main() {
   vector<Quaternion> Qs;
   vector<double> Ts;
   cout << setprecision(16);
-  FrameFromAngularVelocity(&Omega, T_i, T_f, Qs, Ts);
+  FrameFromAngularVelocity_2D(&Omega, T_i, T_f, Qs, Ts);
+  double MaxError = 0.0;
   for(unsigned int i=0; i<Ts.size(); ++i) {
+    const Quaternion R_1 = R_1func(Ts[i]);
+    const Quaternion z_1 = R_1*zHat*R_1.conjugate();
+    const Quaternion z_2 = Qs[i]*zHat*Qs[i].conjugate();
+    const double Error = (z_1-z_2).abs();
+    MaxError = (Error>MaxError ? Error : MaxError);
     cout << Ts[i]
-  	 // << "\n\t" << Qs[i]
-  	 // << "\t" << Qs[i].angle()
-  	 // << "\n\t" << R_1func(Ts[i])
-  	 // << "\n\t" << Qs[i]-R_1func(Ts[i])
-  	 << "\t" << (Qs[i]-R_1func(Ts[i])).abs()
-  	 // << "\t" << 1.e-14*std::sqrt(i)
+  	 // << "\t" << Qs[i]
+  	 // << "\t" << Quaternion(Omega(Ts[i]))
+  	 << "\t" << Error
   	 << endl;
   }
-  cout << "Took " << Ts.size() << " steps." << endl;
+  cerr << "Took " << Ts.size() << " steps.\tMaxError = " << MaxError << endl;
 
   return 0;
 }

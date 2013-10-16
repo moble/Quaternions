@@ -17,8 +17,10 @@ OPT = -O3 -fopenmp -Wall -Wno-deprecated -lgsl
 # Tell 'make' not to look for files with the following names
 .PHONY : all
 
-all : TestAngularVelocityIntegration
+all : TestAngularVelocityIntegration TestAngularVelocityIntegration_2D
 
 # This is how to build those object files
 TestAngularVelocityIntegration : TestAngularVelocityIntegration.cpp
+	$(C++) $(OPT) $(INCFLAGS) ../Quaternions.o ../IntegrateAngularVelocity.o $< -o $@
+TestAngularVelocityIntegration_2D : TestAngularVelocityIntegration_2D.cpp
 	$(C++) $(OPT) $(INCFLAGS) ../Quaternions.o ../IntegrateAngularVelocity.o $< -o $@
