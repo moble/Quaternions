@@ -54,7 +54,22 @@ from distutils.core import setup, Extension
 from subprocess import check_output, CalledProcessError
 from os import devnull, environ
 
-## See if GSL_HOME is set; if so, use it
+# If /opt/local directories exist, use them
+from os.path import isdir
+if isdir('/opt/local/include'):
+    IncDirs = ['/opt/local/include']
+else:
+    IncDirs = []
+if isdir('/opt/local/lib'):
+    LibDirs = ['/opt/local/lib']
+else:
+    LibDirs = []
+
+# Add directories for numpy inclusion
+from numpy import get_include
+IncDirs += [get_include()]
+
+# Add directories for GSL, if needed
 if GSL :
     SourceFiles = ['Quaternions.cpp',
                    'IntegrateAngularVelocity.cpp',
@@ -62,19 +77,15 @@ if GSL :
     Dependencies = ['Quaternions.hpp',
                     'IntegrateAngularVelocity.hpp']
     Libraries = ['gsl', 'gslcblas']
+    ## See if GSL_HOME is set; if so, use it
     if "GSL_HOME" in environ :
-        IncDirs = [environ["GSL_HOME"]+'/include', '/opt/local/include']
-        LibDirs = [environ["GSL_HOME"]+'/lib', '/opt/local/lib']
-    else :
-        IncDirs = ['/opt/local/include']
-        LibDirs = ['/opt/local/lib']
+        IncDirs = [environ["GSL_HOME"]+'/include'] + IncDirs
+        LibDirs = [environ["GSL_HOME"]+'/lib'] + IncDirs
 else :
     SourceFiles = ['Quaternions.cpp',
                    'Quaternions.i']
     Dependencies = ['Quaternions.hpp']
     Libraries = []
-    IncDirs = []
-    LibDirs = []
 
 ## Remove a compiler flag that doesn't belong there for C++
 import distutils.sysconfig as ds
@@ -121,7 +132,7 @@ setup(name="Quaternions",
                   libraries=Libraries,
                   #define_macros = [('CodeRevision', CodeRevision)],
                   language='c++',
-                  swig_opts=['-globals', 'constants', '-c++'],
+                  swig_opts=['-globals', 'constants', '-c++', '-builtin'],# '-debug-tmsearch'],
                   extra_link_args=['-lgomp', '-fPIC'],
                   # extra_link_args=['-lgomp', '-fPIC', '-Wl,-undefined,error'], # `-undefined,error` tells the linker to fail on undefined symbols
                   extra_compile_args=['-Wno-deprecated']
