@@ -11,67 +11,21 @@
 %include <typemaps.i>
 %include <stl.i>
 
-// %{
-//   #include "/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/numpy/core/include/numpy/arrayobject.h"
-//   #include <vector>
-// %}
+%{
+  #define SWIG_FILE_WITH_INIT
+  #include <vector>
+%}
 
-// %init %{
-//   import_array();
-// %}
+// Use numpy below
+%include <numpy.i>
+%init %{
+import_array();
+%}
+%pythoncode %{
+  import numpy;
+%}
 
-// %typemap(out) std::vector<int> {
-//   npy_intp result_size = $1.size();
-//   npy_intp dims[1] = { result_size };
-//   PyArrayObject* npy_arr = (PyArrayObject*)PyArray_SimpleNew(1, dims, NPY_INT);
-//   int* dat = (int*) PyArray_DATA(npy_arr);
-//   for (size_t i = 0; i < result_size; ++i) { dat[i] = $1[i]; }
-//   $result = PyArray_Return(npy_arr);
-// }
-// %typemap(out) std::vector<int>& {
-//   npy_intp result_size = $1->size();
-//   npy_intp dims[1] = { result_size };
-//   PyArrayObject* npy_arr = (PyArrayObject*)PyArray_SimpleNew(1, dims, NPY_INT);
-//   int* dat = (int*) PyArray_DATA(npy_arr);
-//   for (size_t i = 0; i < result_size; ++i) { dat[i] = (*$1)[i]; }
-//   $result = PyArray_Return(npy_arr);
-// }
-// %typemap(out) std::vector<std::vector<int> >& {
-//   npy_intp result_size = $1->size();
-//   npy_intp result_size2 = (result_size>0 ? (*$1)[0].size() : 0);
-//   npy_intp dims[2] = { result_size, result_size2 };
-//   PyArrayObject* npy_arr = (PyArrayObject*)PyArray_SimpleNew(2, dims, NPY_INT);
-//   int* dat = (int*) PyArray_DATA(npy_arr);
-//   for (size_t i = 0; i < result_size; ++i) { for (size_t j = 0; j < result_size2; ++j) { dat[i*result_size2+j] = (*$1)[i][j]; } }
-//   $result = PyArray_Return(npy_arr);
-// }
-
-// %typemap(out) std::vector<double> {
-//   npy_intp result_size = $1.size();
-//   npy_intp dims[1] = { result_size };
-//   PyArrayObject* npy_arr = (PyArrayObject*)PyArray_SimpleNew(1, dims, NPY_DOUBLE);
-//   double* dat = (double*) PyArray_DATA(npy_arr);
-//   for (size_t i = 0; i < result_size; ++i) { dat[i] = $1[i]; }
-//   $result = PyArray_Return(npy_arr);
-// }
-// %typemap(out) std::vector<double>& {
-//   npy_intp result_size = $1->size();
-//   npy_intp dims[1] = { result_size };
-//   PyArrayObject* npy_arr = (PyArrayObject*)PyArray_SimpleNew(1, dims, NPY_DOUBLE);
-//   double* dat = (double*) PyArray_DATA(npy_arr);
-//   for (size_t i = 0; i < result_size; ++i) { dat[i] = (*$1)[i]; }
-//   $result = PyArray_Return(npy_arr);
-// }
-// %typemap(out) std::vector<std::vector<double> >& {
-//   npy_intp result_size = $1->size();
-//   npy_intp result_size2 = (result_size>0 ? (*$1)[0].size() : 0);
-//   npy_intp dims[2] = { result_size, result_size2 };
-//   PyArrayObject* npy_arr = (PyArrayObject*)PyArray_SimpleNew(2, dims, NPY_DOUBLE);
-//   double* dat = (double*) PyArray_DATA(npy_arr);
-//   for (size_t i = 0; i < result_size; ++i) { for (size_t j = 0; j < result_size2; ++j) { dat[i*result_size2+j] = (*$1)[i][j]; } }
-//   $result = PyArray_Return(npy_arr);
-// }
-
+// Slurp up the documentation
 %include "docs/Quaternions_Doc.i"
 
 ///////////////////////////////////
@@ -109,9 +63,6 @@
 /////////////////////////////////////////////////
 %{
   #include <iostream>
-  #include <string>
-  #include <sstream>
-  #include <iomanip>
   #include <complex>
   #include "Quaternions.hpp"
   #include "IntegrateAngularVelocity.hpp"
@@ -121,39 +72,169 @@
 //////////////////////////////////////////////////////////////////////
 //// The following translates between c++ and python types nicely ////
 //////////////////////////////////////////////////////////////////////
-//// This lets me use numpy.array in the code below
-%pythoncode %{
-  import numpy;
-  %}
-//// Make sure std::strings are dealt with appropriately
-%include <std_string.i>
-//// Make sure std::complex numbers are dealt with appropriately
-%include <std_complex.i>
-// namespace std {
-//   %template(complexd) complex<double>; // Don't use this line!!!
-// };
-//// Make sure std::vectors are dealt with appropriately
-%include <std_vector.i>
+%include "vector_typemaps.i"
 namespace Quaternions {
   class Quaternion;
  };
-namespace std {
-  %template(vectori) vector<int>;
-  %template(vectorvectori) vector<vector<int> >;
-  %template(vectord) vector<double>;
-  %template(vectorvectord) vector<vector<double> >;
-  %template(vectorc) vector<std::complex<double> >;
-  %template(vectorvectorc) vector<vector<std::complex<double> > >;
-  %template(vectorq) vector<Quaternions::Quaternion>;
-  %template(vectors) vector<string>;
-  %template(vectorvectors) vector<vector<std::string> >;
-};
+
+// A missing precedence definition (a la `swig.swg`)
+%define SWIG_TYPECHECK_QUATERNION         101     %enddef
+%define SWIG_TYPECHECK_QUATERNION_ARRAY   1092    %enddef
+
+// typecheck supports overloading
+%typecheck(SWIG_TYPECHECK_QUATERNION) Quaternions::Quaternion {
+  $1 = PySequence_Check($input) ? 1 : 0;
+}
+// Allow list input (with length 4)
+%typemap(in) Quaternions::Quaternion
+(Quaternions::Quaternion tmp, PyObject* item) {
+  // A first sequence test
+  if (!PySequence_Check($input)) {
+    SWIG_exception(SWIG_TypeError, "expected a sequence for argument $argnum");
+  }
+  // Get sequence length
+  Py_ssize_t pyseq_length = PySequence_Size($input);
+  if (pyseq_length != 4) {
+    SWIG_exception(SWIG_TypeError, "expected a sequence with length "	\
+		   "4 for argument $argnum");
+  }
+  for (i = 0; i < pyseq_length; i++) {
+    item = PySequence_GetItem($input, i);
+    if(!SWIG_IsOK(SWIG_AsVal(double)(item, value))) {
+      Py_DECREF(item);
+      SWIG_exception(SWIG_TypeError, "expected items of sequence to be of type "\
+		     "\"double\" in argument $argnum");
+    }
+    tmp[i] = value;
+    Py_DECREF(item);
+  }
+  $1 = &tmp_vec;
+}
+
+// typecheck supports overloading
+%typecheck(SWIG_TYPECHECK_QUATERNION) Quaternions::Quaternion& {
+  if(!PySequence_Check($input) || !PySequence_Size($input)) {
+    $1 = 0;
+  } else {
+    PyObject* item = PySequence_GetItem($input, 0);
+    $1 = PyNumber_Check(item) ? 1 : 0;
+  }
+}
+//Allow list input (with length 4)
+%typemap(in) Quaternions::Quaternion&
+(Quaternions::Quaternion tmp, PyObject* item, double value, Py_ssize_t i) {
+  // A first sequence test
+  if (!PySequence_Check($input)) {
+    SWIG_exception(SWIG_TypeError, "expected a sequence for argument $argnum");
+  }
+  // Get sequence length
+  Py_ssize_t pyseq_length = PySequence_Size($input);
+  if (pyseq_length != 4) {
+    SWIG_exception(SWIG_TypeError, "expected a sequence with length "	\
+		   "4 for argument $argnum");
+  }
+  for (i = 0; i < pyseq_length; i++) {
+    item = PySequence_GetItem($input, i);
+    if(!SWIG_IsOK(SWIG_AsVal(double)(item, &value))) {
+      Py_DECREF(item);
+      SWIG_exception(SWIG_TypeError, "expected items of sequence to be of type "\
+		     "\"double\" in argument $argnum");
+    }
+    tmp[i] = value;
+    Py_DECREF(item);
+  }
+  $1 = &tmp;
+}
+
+// Return Quaternions as numpy arrays
+%typemap(out) Quaternions::Quaternion {
+  npy_intp dims[1] = { 4 };
+  PyArrayObject* npy_arr = (PyArrayObject*)PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+  double* dat = (double*) PyArray_DATA(npy_arr);
+  for (size_t i=0; i<4; ++i) { dat[i] = $1[i]; }
+  $result = PyArray_Return(npy_arr);
+}
+
+// Return Quaternions as numpy arrays
+%typemap(out) std::vector<Quaternions::Quaternion> {
+  size_t result_size1 = $1.size();
+  npy_intp dims[2] = {result_size1, 4};
+  PyArrayObject* npy_arr = (PyArrayObject*)PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+  double* dat = (double*) PyArray_DATA(npy_arr);
+  for (size_t i = 0; i < result_size1; ++i) {
+    dat[i*4]   = (std::vector< Quaternions::Quaternion >($1))[i][0];
+    dat[i*4+1] = (std::vector< Quaternions::Quaternion >($1))[i][1];
+    dat[i*4+2] = (std::vector< Quaternions::Quaternion >($1))[i][2];
+    dat[i*4+3] = (std::vector< Quaternions::Quaternion >($1))[i][3];
+  }
+  $result = PyArray_Return(npy_arr);
+}
+
+
+%typecheck(SWIG_TYPECHECK_QUATERNION_ARRAY) std::vector<Quaternions::Quaternion>& {
+  // Check for nested sequence
+  if(!PySequence_Check($input)) {
+    // This is not a sequence at all
+    $1 = 0;
+  } else {
+    if(!PySequence_Size($input)) {
+      // The sequence has length 0...
+      $1 = 1;
+    } else {
+      PyObject* item = PySequence_GetItem($input, 0);
+      if(!PySequence_Check(item) || PySequence_Size(item)!=4) {
+	// This is not a *nested* sequence, or the inner sequence
+	// does not have length 4 (for a quaternion)
+	$1 = 0;
+      } else {
+	// Check that what's inside this sequence is just a number
+	PyObject* item2 = PySequence_GetItem(item, 0);
+	$1 = PyNumber_Check(item2) ? 1 : 0;
+      }
+    }
+  }
+}
+%fragment("SWIG_AsVal_frag(Quaternion)", "header") {
+  SWIGINTERNINLINE int SWIG_AsVal(Quaternion)(SWIG_Object obj, Quaternions::Quaternion& val) {
+    if(!PySequence_Check(obj) || PySequence_Size(obj)!=4) {
+      return SWIG_TypeError;
+    }
+    double value;
+    for(size_t i=0; i<4; ++i) {
+      PyObject* component = PySequence_GetItem(obj, i);
+      int res = SWIG_AsVal(double)(component, &value);
+      if(!SWIG_IsOK(res)) {
+	return res;
+      }
+      val[i] = value;
+    }
+    return 0;
+  }
+}
+%typemap (in, fragment="SWIG_AsVal_frag(Quaternion)") std::vector<Quaternions::Quaternion>&
+(std::vector<Quaternions::Quaternion> tmp_vec, PyObject* item, Quaternions::Quaternion value, Py_ssize_t i) {
+  // Get sequence length
+  Py_ssize_t pyseq_length = PySequence_Size($input);
+  tmp_vec.reserve(pyseq_length);
+  for (i=0; i<pyseq_length; i++) {
+    item = PySequence_GetItem($input, i);
+    if(!SWIG_IsOK(SWIG_AsVal(Quaternion)(item, value))) {
+      Py_DECREF(item);
+      SWIG_exception(SWIG_TypeError, "expected items of sequence to be of type " \
+		     "\"Quaternion\" in argument $argnum");
+    }
+    tmp_vec.push_back(value);
+    Py_DECREF(item);
+  }
+  $1 = &tmp_vec;
+}
+
 
 
 /////////////////////////////////////
 //// Import the quaternion class ////
 /////////////////////////////////////
-%ignore Quaternions::Quaternion::operator=;
+// %ignore Quaternions::Quaternion::operator=;
 %rename(__getitem__) Quaternions::Quaternion::operator [](const unsigned int) const;
 %rename(__setitem__) Quaternions::Quaternion::operator [](const unsigned int);
 %include "Quaternions.hpp"
@@ -165,7 +246,7 @@ namespace std {
     S << std::setprecision(14) << "["
       << $self->operator[](0) << ", "
       << $self->operator[](1) << ", "
-      << $self->operator[](2) << ", " 
+      << $self->operator[](2) << ", "
       << $self->operator[](3) << "]";
     const std::string& tmp = S.str();
     const char* cstr = tmp.c_str();
