@@ -57,7 +57,7 @@ const std::vector<TYPE>&  ARG_NAME
   npy_intp size = $1->size();
   PyArrayObject *ret = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNew(1, &size, NUMPY_TYPE));
   TYPE* data = static_cast<TYPE*>(PyArray_DATA(ret));
-  for (int i = 0; i < size; ++i)
+  for (npy_intp i = 0; i < size; ++i)
     data[i] = (*$1)[i];
   // Append the output to $result
   %append_output(PyArray_Return(ret));
@@ -77,7 +77,7 @@ const std::vector<TYPE>&  ARG_NAME
   npy_intp dims[2] = { result_size, result_size2 };
   PyArrayObject* npy_arr = (PyArrayObject*)PyArray_SimpleNew(2, dims, NUMPY_TYPE);
   TYPE* dat = static_cast<TYPE*>(PyArray_DATA(npy_arr));
-  for (size_t i = 0; i < result_size; ++i) { for (size_t j = 0; j < result_size2; ++j) { dat[i*result_size2+j] = (*$1)[i][j]; } }
+  for (npy_intp i = 0; i < result_size; ++i) { for (npy_intp j = 0; j < result_size2; ++j) { dat[i*result_size2+j] = (*$1)[i][j]; } }
   %append_output(PyArray_Return(npy_arr));
 }
 %enddef
