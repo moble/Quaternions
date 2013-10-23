@@ -3,7 +3,6 @@
 // Copyright (c) 2013, Michael Boyle
 // See LICENSE file for details
 
-
 %module Quaternions
 
  // Quiet warnings about overloaded operators being ignored.

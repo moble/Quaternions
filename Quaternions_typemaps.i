@@ -1,3 +1,5 @@
+// -*- c++ -*-
+
 //////////////////////////////////////////////////////////////////////
 //// The following translates between c++ and python types nicely ////
 //////////////////////////////////////////////////////////////////////
@@ -59,10 +61,10 @@ namespace std {
       SWIG_exception_fail(SWIG_ArgError(res), "expected argument $argnum to be of type \"Quaternion\".");
     }
     Quaternions::Quaternion* ptmp2 = reinterpret_cast< Quaternions::Quaternion * >(ptmp);
-    tmp[0] = ptmp2->operator[](0);
-    tmp[1] = ptmp2->operator[](1);
-    tmp[2] = ptmp2->operator[](2);
-    tmp[3] = ptmp2->operator[](3);
+    tmp[0] = (*ptmp2)[0];
+    tmp[1] = (*ptmp2)[1];
+    tmp[2] = (*ptmp2)[2];
+    tmp[3] = (*ptmp2)[3];
     $1 = &tmp;
   }
 }
@@ -100,10 +102,10 @@ namespace std {
       SWIG_exception_fail(SWIG_ArgError(res), "expected argument $argnum to be of type \"Quaternion\".");
     }
     Quaternions::Quaternion* ptmp2 = reinterpret_cast< Quaternions::Quaternion * >(ptmp);
-    tmp[0] = ptmp2->operator[](0);
-    tmp[1] = ptmp2->operator[](1);
-    tmp[2] = ptmp2->operator[](2);
-    tmp[3] = ptmp2->operator[](3);
+    tmp[0] = (*ptmp2)[0];
+    tmp[1] = (*ptmp2)[1];
+    tmp[2] = (*ptmp2)[2];
+    tmp[3] = (*ptmp2)[3];
     $1 = &tmp;
   }
 }
