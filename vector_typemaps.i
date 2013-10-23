@@ -186,6 +186,22 @@ const std::vector<TYPE>&  ARG_NAME
 }
 %enddef
 
+%define OUT_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES(TYPE, NUMPY_TYPE)
+%typemap(out) std::vector<std::vector<TYPE> >
+{
+  npy_intp adim1 = (&$1)->size();
+  npy_intp adim2 = (adim1>0 ? (*(&$1))[0].size() : 0);
+  npy_intp adims[2] = {adim1, adim2};
+  $result = PyArray_SimpleNew(2, adims, NUMPY_TYPE);
+  TYPE* data = static_cast<TYPE*>(PyArray_DATA(reinterpret_cast<PyArrayObject*>($result)));
+  for(npy_intp i=0; i<adim1; ++i) {
+    for(npy_intp j=0; j<adim2; ++j) {
+      data[i*adim2+j] = (*(&$1))[i][j];
+    }
+  }
+}
+%enddef
+
 
 ARGOUT_TYPEMAP_STD_VECTOR_OF_PRIMITIVES(int, INT32, ARGOUT, NPY_INT)
 ARGOUT_TYPEMAP_STD_VECTOR_OF_PRIMITIVES(double, DOUBLE, ARGOUT, NPY_DOUBLE)
