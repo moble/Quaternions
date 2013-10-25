@@ -19,9 +19,9 @@
 namespace Quaternions {
   class Quaternion;
 };
-namespace std {
-  %template(vectorq) vector<Quaternions::Quaternion>;
-};
+// namespace std {
+//   %template(vectorq) vector<Quaternions::Quaternion>;
+// };
 
 
 // A missing precedence definition (a la `swig.swg`)
@@ -112,3 +112,8 @@ namespace std {
 
 %include <std_vector.i>
 %include "vector_typemaps.i"
+
+namespace std {
+  %template(vectorq) vector<Quaternions::Quaternion>;
+  %template(vectord) vector<double>;
+};
