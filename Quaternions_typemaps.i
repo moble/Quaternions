@@ -116,4 +116,5 @@ namespace Quaternions {
 namespace std {
   %template(vectorq) vector<Quaternions::Quaternion>;
   %template(vectord) vector<double>;
+  %template(vectorvectord) vector<vector<double> >;
 };
