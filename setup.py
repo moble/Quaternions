@@ -75,7 +75,8 @@ if GSL :
                    'IntegrateAngularVelocity.cpp',
                    'Quaternions.i']
     Dependencies = ['Quaternions.hpp',
-                    'IntegrateAngularVelocity.hpp']
+                    'IntegrateAngularVelocity.hpp',
+                    'Quaternions_typemap.i']
     Libraries = ['gsl', 'gslcblas']
     ## See if GSL_HOME is set; if so, use it
     if "GSL_HOME" in environ :
@@ -84,7 +85,8 @@ if GSL :
 else :
     SourceFiles = ['Quaternions.cpp',
                    'Quaternions.i']
-    Dependencies = ['Quaternions.hpp']
+    Dependencies = ['Quaternions.hpp',
+                    'Quaternions_typemap.i']
     Libraries = []
 
 ## Remove a compiler flag that doesn't belong there for C++
