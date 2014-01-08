@@ -164,6 +164,8 @@ namespace Quaternions {
   std::vector<double> Component2(const std::vector<Quaternions::Quaternion>& Q);
   std::vector<double> Component3(const std::vector<Quaternions::Quaternion>& Q);
 
+  std::vector<std::vector<double> > vec(const std::vector<Quaternions::Quaternion>& Q);
+
   std::vector<Quaternion> QuaternionDerivative(const std::vector<Quaternion>& f, const std::vector<double>& t);
 
 } // namespace Quaternions

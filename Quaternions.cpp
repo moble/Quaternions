@@ -1190,6 +1190,14 @@ std::vector<double> Quaternions::Component3(const std::vector<Quaternions::Quate
   return Component(Q, 3);
 }
 
+std::vector<std::vector<double> > Quaternions::vec(const std::vector<Quaternions::Quaternion>& Q) {
+  const unsigned int size = Q.size();
+  std::vector<std::vector<double> > v(size);
+  for(unsigned int i=0; i<size; ++i) {
+    v[i] = Q[i].vec();
+  }
+  return v;
+}
 
 #endif // DOXYGEN
 
