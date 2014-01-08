@@ -698,6 +698,11 @@ std::vector<Quaternion> Quaternions::Squad(const std::vector<Quaternion>& RIn, c
   return ROut;
 }
 
+std::vector<Quaternion> Quaternions::FrameAngularVelocity(const std::vector<Quaternion>& f, const std::vector<double>& t) {
+  return 2.0*Quaternions::QuaternionDerivative(f, t)*f;
+}
+
+
 #ifndef DOXYGEN
 std::vector<Quaternion> Quaternions::operator+(const double a, const std::vector<Quaternion>& Q) {
   vector<Quaternion> R(Q.size());

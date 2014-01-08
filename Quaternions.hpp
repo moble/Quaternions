@@ -100,6 +100,7 @@ namespace Quaternions {
   std::vector<Quaternion> UnflipRotors(const std::vector<Quaternion>& R, const double discont=1.4142135623730951);
   std::vector<Quaternion> RDelta(const std::vector<Quaternion>& R1, const std::vector<Quaternion>& R2, const unsigned int IndexOfFiducialTime=0);
   std::vector<Quaternion> Squad(const std::vector<Quaternion>& RIn, const std::vector<double>& tIn, const std::vector<double>& tOut);
+  std::vector<Quaternion> FrameAngularVelocity(const std::vector<Quaternion>& f, const std::vector<double>& t);
 
   std::vector<Quaternion> operator+(const double a, const std::vector<Quaternion>& Q);
   std::vector<Quaternion> operator-(const double a, const std::vector<Quaternion>& Q);
