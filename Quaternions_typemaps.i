@@ -7,6 +7,7 @@
 %include <typemaps.i>
 %include <stl.i>
 
+#ifndef SWIGIMPORTED
 // Use numpy below
 %include <numpy.i>
 %init %{
@@ -15,10 +16,8 @@
 %pythoncode %{
   import numpy;
 %}
+#endif
 
-namespace Quaternions {
-  class Quaternion;
-};
 
 
 // A missing precedence definition (a la `swig.swg`)
