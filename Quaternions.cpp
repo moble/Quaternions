@@ -261,7 +261,8 @@ Quaternion Quaternions::Quaternion::log() const {
   } else {
     const double v = std::atan2(b, w);
     const double f = v/b;
-    Result.w = std::log(w/std::cos(v));
+    Result.w = std::log(w*w+b*b)/2.0;
+    // Result.w = std::log(w/std::cos(v)); // Not nice for unit vectors [w=cos(v)=0]
     Result.x = f*x;
     Result.y = f*y;
     Result.z = f*z;
