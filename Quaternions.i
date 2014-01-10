@@ -64,7 +64,9 @@
 /////////////////////////////////////
 //// Import the quaternion class ////
 /////////////////////////////////////
-// %ignore Quaternions::Quaternion::operator=;
+#ifndef SWIGPYTHON_BUILTIN
+%ignore Quaternions::Quaternion::operator=;
+#endif
 %include "Quaternions.hpp"
 %include "IntegrateAngularVelocity.hpp"
 #if defined(SWIGPYTHON_BUILTIN)
@@ -106,6 +108,19 @@
     const char* cstr = tmp.c_str();
     return cstr;
   }
+  #ifndef SWIGPYTHON_BUILTIN
+  // This allows nicer manipulations
+  %pythoncode{
+    def __pow__(self, P) :
+        return self.pow(P)
+    __radd__ = __add__
+    def __rsub__(self, t) :
+        return -self+t
+    __rmul__ = __mul__
+    def __rdiv__(self, t) :
+        return self.inverse()*t
+  };
+  #endif
  };
 
 /// Add utility functions that are specific to python.  Note that
