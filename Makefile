@@ -66,7 +66,7 @@ OPT = -O3 -fopenmp -Wall -Wno-deprecated
 cpp : Quaternions.o IntegrateAngularVelocity.o
 
 # This is how to build those object files
-%.o : %.cpp %.hpp
+%.o : %.cpp %.hpp Errors.hpp
 	$(C++) $(OPT) -c $(INCFLAGS) $< -o $@
 
 # The following are just handy targets for removing compiled stuff

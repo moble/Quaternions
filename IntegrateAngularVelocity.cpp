@@ -11,6 +11,8 @@
 
 #include "Quaternions.hpp"
 #include "IntegrateAngularVelocity.hpp"
+#include "Errors.hpp"
+
 using Quaternions::Quaternion;
 using Quaternions::QuaternionArray;
 
@@ -22,9 +24,6 @@ using std::endl;
 using std::flush;
 using std::vector;
 
-
-// Define some error codes, which will be used in python
-#define FailedGSLCall 6
 
 
 typedef vector<double> (*OmegaFunc)(const double);

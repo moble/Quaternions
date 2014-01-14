@@ -7,6 +7,7 @@
 #include <iostream>
 #include <iomanip>
 #include <math.h> // acosh is in math.h, but not cmath
+#include "Errors.hpp"
 
 
 // Note: Don't do 'using namespace Quaternions' because we don't want
@@ -25,14 +26,6 @@ using std::endl;
 using std::flush;
 using std::vector;
 
-
-// Define some error codes, which will be used in python
-#define IndexOutOfBounds 0
-#define InfinitelyManySolutions 1
-#define NotEnoughPointsForDerivative 2
-#define VectorSizeNotUnderstood 3
-#define VectorSizeMismatch 4
-#define CannotExtrapolateQuaternions 5
 
 
 
