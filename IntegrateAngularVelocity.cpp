@@ -15,7 +15,6 @@
 
 using Quaternions::Quaternion;
 using Quaternions::QuaternionArray;
-using namespace Quaternions;
 
 // Note: Don't do 'using namespace std' because we don't want to
 // confuse which log, exp, etc., is being used in any instance.
@@ -61,7 +60,7 @@ int FrameFromAngularVelocity_RHS(double t, const double ri[], double drdt[], voi
 }
 #endif // DOXYGEN
 /// Find the frame with the given angular velocity data
-std::vector<Quaternion> FrameFromAngularVelocity(const std::vector<Quaternion>& Omega, const std::vector<double>& T) {
+std::vector<Quaternions::Quaternion> Quaternions::FrameFromAngularVelocity(const std::vector<Quaternions::Quaternion>& Omega, const std::vector<double>& T) {
   ///
   /// \param Omega Vector of Quaternions.
   /// \param T Vector of corresponding times.
@@ -153,6 +152,7 @@ std::vector<Quaternion> FrameFromAngularVelocity(const std::vector<Quaternion>& 
 }
 
 
+#ifndef DOXYGEN
 int FrameFromAngularVelocity_RHS_p(double t, const double ri[], double drdt[], void* Omega) {
   // Pack some values
   vector<double> rfrak(3);
@@ -167,8 +167,10 @@ int FrameFromAngularVelocity_RHS_p(double t, const double ri[], double drdt[], v
   // GSL wants to hear that everything went okay
   return GSL_SUCCESS;
 }
+#endif // DOXYGEN
 /// Find the frame with the given angular velocity function
-void FrameFromAngularVelocity(OmegaFunc Omega, const double t0, const double t1, std::vector<Quaternion>& Qs, std::vector<double>& Ts) {
+void Quaternions::FrameFromAngularVelocity(std::vector<double> (* Omega)(const double t), const double t0, const double t1,
+					   std::vector<Quaternions::Quaternion>& Qs, std::vector<double>& Ts) {
   ///
   /// \param Omega Function pointer returning angular velocity
   /// \param t0 Initial time
@@ -300,7 +302,7 @@ int FrameFromAngularVelocity_2D_RHS(double t, const double ri[], double drdt[], 
   return GSL_SUCCESS;
 }
 #endif // DOXYGEN
-std::vector<Quaternion> FrameFromAngularVelocity_2D(const std::vector<Quaternion>& Omega, const std::vector<double>& T) {
+std::vector<Quaternions::Quaternion> Quaternions::FrameFromAngularVelocity_2D(const std::vector<Quaternions::Quaternion>& Omega, const std::vector<double>& T) {
   ///
   /// \param Omega Vector of Quaternions.
   /// \param T Vector of corresponding times.
@@ -384,14 +386,17 @@ std::vector<Quaternion> FrameFromAngularVelocity_2D(const std::vector<Quaternion
 }
 
 
+#ifndef DOXYGEN
 int FrameFromAngularVelocity_2D_RHS_p(double t, const double ri[], double drdt[], void* Omega) {
   // Evaluate the RHS
   Quaternions::FrameFromAngularVelocity_2D_Integrand(ri[0], ri[1], ((OmegaFunc) Omega)(t), drdt[0], drdt[1]);
   // GSL wants to hear that everything went okay
   return GSL_SUCCESS;
 }
+#endif // DOXYGEN
 /// Find the frame with the given angular velocity function
-void FrameFromAngularVelocity_2D(OmegaFunc Omega, const double t0, const double t1, std::vector<Quaternion>& Qs, std::vector<double>& Ts) {
+void Quaternions::FrameFromAngularVelocity_2D(std::vector<double> (* Omega)(const double t), const double t0, const double t1,
+					      std::vector<Quaternions::Quaternion>& Qs, std::vector<double>& Ts) {
   ///
   /// \param Omega Function pointer returning angular velocity
   /// \param t0 Initial time
