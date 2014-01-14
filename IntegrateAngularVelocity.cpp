@@ -15,8 +15,7 @@
 
 using Quaternions::Quaternion;
 using Quaternions::QuaternionArray;
-using Quaternions::FrameFromAngularVelocity;
-using Quaternions::FrameFromAngularVelocity_2D;
+using namespace Quaternions;
 
 // Note: Don't do 'using namespace std' because we don't want to
 // confuse which log, exp, etc., is being used in any instance.
@@ -62,7 +61,7 @@ int FrameFromAngularVelocity_RHS(double t, const double ri[], double drdt[], voi
 }
 #endif // DOXYGEN
 /// Find the frame with the given angular velocity data
-std::vector<Quaternion> Quaternions::FrameFromAngularVelocity(const std::vector<Quaternion>& Omega, const std::vector<double>& T) {
+std::vector<Quaternion> FrameFromAngularVelocity(const std::vector<Quaternion>& Omega, const std::vector<double>& T) {
   ///
   /// \param Omega Vector of Quaternions.
   /// \param T Vector of corresponding times.
@@ -301,7 +300,7 @@ int FrameFromAngularVelocity_2D_RHS(double t, const double ri[], double drdt[], 
   return GSL_SUCCESS;
 }
 #endif // DOXYGEN
-std::vector<Quaternion> Quaternions::FrameFromAngularVelocity_2D(const std::vector<Quaternion>& Omega, const std::vector<double>& T) {
+std::vector<Quaternion> FrameFromAngularVelocity_2D(const std::vector<Quaternion>& Omega, const std::vector<double>& T) {
   ///
   /// \param Omega Vector of Quaternions.
   /// \param T Vector of corresponding times.

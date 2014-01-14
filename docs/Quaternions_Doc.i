@@ -859,7 +859,68 @@ Print the quaternion nicely to stream.
   
 """
 
+%feature("docstring") Quaternions::Quaternion::normalized """
+
+
+  Parameters
+  ----------
+    (none)
+  
+  Returns
+  -------
+    Quaternion
+  
+"""
+
+%feature("docstring") FrameFromAngularVelocity_2D_RHS_p """
+
+
+  Parameters
+  ----------
+    double t
+    const double ri
+    double drdt
+    void * Omega
+  
+  Returns
+  -------
+    int
+  
+"""
+
+%feature("docstring") Quaternions::Quaternion::log """
+Return logarithm of Quaternion.
+===============================
+  Parameters
+  ----------
+    (none)
+  
+  Returns
+  -------
+    Quaternion
+  
+"""
+
 %feature("docstring") FrameFromAngularVelocity_2D """
+
+
+  Parameters
+  ----------
+    const vector<Quaternion>& Omega
+      Vector of Quaternions.
+    const vector<double>& T
+      Vector of corresponding times.
+  
+  Returns
+  -------
+    vector<Quaternion>
+  
+  Description
+  -----------
+    Note that each element of Omega should be a pure-vector Quaternion,
+    corresponding to the angular-velocity vector at the instant of time.
+  
+
 Find the frame with the given angular velocity function.
 ========================================================
   Parameters
@@ -907,48 +968,6 @@ Find the frame with the given angular velocity function.
     will flip signs when the logarithm is reset. This will have no effect on
     the physical frame deduced from the rotor, but could be bad news for
     interpolations. So we simply 'unflip' the signs when returning.
-  
-"""
-
-%feature("docstring") Quaternions::Quaternion::normalized """
-
-
-  Parameters
-  ----------
-    (none)
-  
-  Returns
-  -------
-    Quaternion
-  
-"""
-
-%feature("docstring") Quaternions::Quaternion::log """
-Return logarithm of Quaternion.
-===============================
-  Parameters
-  ----------
-    (none)
-  
-  Returns
-  -------
-    Quaternion
-  
-"""
-
-%feature("docstring") FrameFromAngularVelocity_2D_RHS_p """
-
-
-  Parameters
-  ----------
-    double t
-    const double ri
-    double drdt
-    void * Omega
-  
-  Returns
-  -------
-    int
   
 """
 
@@ -1229,6 +1248,37 @@ Construct minimal-rotation frame from Z basis vector of that frame.
 """
 
 %feature("docstring") FrameFromAngularVelocity """
+Find the frame with the given angular velocity data.
+====================================================
+  Parameters
+  ----------
+    const vector<Quaternion>& Omega
+      Vector of Quaternions.
+    const vector<double>& T
+      Vector of corresponding times.
+  
+  Returns
+  -------
+    vector<Quaternion>
+  
+  Description
+  -----------
+    Note that each element of Omega should be a pure-vector Quaternion,
+    corresponding to the angular-velocity vector at the instant of time.
+    
+    This function is not as accurate as might be hoped, because the time step
+    of the input data is not adjustable, so you can't do anything like
+    'adaptive' integration. If you have a function that returns Omega given
+    time, you should use the other version of this (overloaded) function that
+    uses such a function. Alternatively, if you are doing an integration as
+    part of a larger system, you can use the code for the other version of this
+    function as a guide on how to do so.
+    
+    FrameFromAngularVelocity(std::vector<double> (* Omega)(const double t),
+    const double t0, const double t1, std::vector<Quaternion>& Qs,
+    std::vector<double>& Ts)
+  
+
 Find the frame with the given angular velocity function.
 ========================================================
   Parameters
