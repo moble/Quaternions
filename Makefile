@@ -60,7 +60,11 @@ OPT = -O3 -fopenmp -Wall -Wno-deprecated
 #############################################################################
 
 # Tell 'make' not to look for files with the following names
-.PHONY : all cpp clean allclean realclean swig
+.PHONY : all cpp clean allclean realclean swig doc
+
+# This rebuilds the documentation, assuming doxygen is working
+doc :
+	make -C docs
 
 # If needed, we can also make object files to use in other C++ programs
 cpp : Quaternions.o IntegrateAngularVelocity.o

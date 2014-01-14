@@ -15,6 +15,8 @@
 
 using Quaternions::Quaternion;
 using Quaternions::QuaternionArray;
+using Quaternions::FrameFromAngularVelocity;
+using Quaternions::FrameFromAngularVelocity_2D;
 
 // Note: Don't do 'using namespace std' because we don't want to
 // confuse which log, exp, etc., is being used in any instance.
@@ -167,12 +169,13 @@ int FrameFromAngularVelocity_RHS_p(double t, const double ri[], double drdt[], v
   return GSL_SUCCESS;
 }
 /// Find the frame with the given angular velocity function
-void Quaternions::FrameFromAngularVelocity(OmegaFunc Omega, const double t0, const double t1, std::vector<Quaternion>& Qs, std::vector<double>& Ts) {
+void FrameFromAngularVelocity(OmegaFunc Omega, const double t0, const double t1, std::vector<Quaternion>& Qs, std::vector<double>& Ts) {
   ///
   /// \param Omega Function pointer returning angular velocity
   /// \param t0 Initial time
   /// \param t1 Final time
-  /// \param R0 Initial frame
+  /// \param Qs Output frame rotors
+  /// \param Ts Output time steps
   ///
   /// This function takes a function pointer `Omega` (which returns a
   /// 3-vector, given the time) and integrates to find the frame with
@@ -389,12 +392,13 @@ int FrameFromAngularVelocity_2D_RHS_p(double t, const double ri[], double drdt[]
   return GSL_SUCCESS;
 }
 /// Find the frame with the given angular velocity function
-void Quaternions::FrameFromAngularVelocity_2D(OmegaFunc Omega, const double t0, const double t1, std::vector<Quaternion>& Qs, std::vector<double>& Ts) {
+void FrameFromAngularVelocity_2D(OmegaFunc Omega, const double t0, const double t1, std::vector<Quaternion>& Qs, std::vector<double>& Ts) {
   ///
   /// \param Omega Function pointer returning angular velocity
   /// \param t0 Initial time
   /// \param t1 Final time
-  /// \param R0 Initial frame
+  /// \param Qs Output frame rotors
+  /// \param Ts Output time steps
   ///
   /// This function takes a function pointer `Omega` (which returns a
   /// 3-vector, given the time) and integrates to find the frame with
