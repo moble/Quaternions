@@ -1205,39 +1205,6 @@ std::vector<std::vector<double> > Quaternions::vec(const std::vector<Quaternions
 // Derivative and integral utility functions //
 ///////////////////////////////////////////////
 
-// /// Three-point finite-differencing of vector of Quaternions.
-// std::vector<Quaternion> Quaternions::QuaternionDerivative(const std::vector<Quaternion>& f, const std::vector<double>& t) {
-//   ///
-//   /// \param f Vector of Quaternions.
-//   /// \param t Vector of corresponding time steps.
-//   if(f.size() != t.size()) {
-//     cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": f.size()=" << f.size() << " != t.size()=" << t.size() << endl;
-//     throw(VectorSizeMismatch);
-//   }
-//   if(f.size()<3) { cerr << "\n" << __FILE__ << ":" << __LINE__ << ": size=" << f.size() << endl; throw(NotEnoughPointsForDerivative); }
-//   vector<Quaternion> D(f.size());
-//   const unsigned int i1 = f.size()-1;
-//   double hprev = t[1]-t[0];
-//   { // Compute first point
-//     const double hnext = t[2]-t[1];
-//     D[0] = -((2*hprev+hnext)/(hprev*(hprev+hnext)))*f[0] + ((hnext+hprev)/(hnext*hprev))*f[1] - (hprev/(hnext*(hnext+hprev)))*f[2];
-//   }
-//   for(unsigned int i=1; i<i1; ++i) { // Compute intermediate points
-//     const double hnext = t[i+1]-t[i];
-//     /// Sundqvist and Veronis, Tellus XXII (1970), 1
-//     D[i] = (f[i+1] - f[i-1]*SQR(hnext/hprev) - f[i]*(1-SQR(hnext/hprev))) / (hnext*(1+hnext/hprev));
-//     hprev = hnext;
-//   }
-//   { // Compute final point
-//     const double hnext = t[i1]  -t[i1-1];
-//     const double hprev = t[i1-1]-t[i1-2];
-//     D[i1] = (hnext/(hprev*(hprev+hnext)))*f[i1-2] - ((hnext+hprev)/(hnext*hprev))*f[i1-1] + ((hprev+2*hnext)/(hnext*(hnext+hprev)))*f[i1];
-//   }
-//   return D;
-// }
-
-
-
 /// Five-point finite-differencing of vector of Quaternions.
 std::vector<Quaternion> Quaternions::QuaternionDerivative(const std::vector<Quaternion>& f, const std::vector<double>& t) {
   ///
