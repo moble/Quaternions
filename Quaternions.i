@@ -115,11 +115,14 @@
 %include "Quaternions.hpp"
 %include "IntegrateAngularVelocity.hpp"
 #if defined(SWIGPYTHON_BUILTIN)
-%feature("python:slot", "sq_length", functype="lenfunc") Quaternions::Quaternion::__len__;
+%feature("python:slot", "mp_length", functype="lenfunc") Quaternions::Quaternion::__len__;
 %feature("python:slot", "mp_subscript", functype="binaryfunc") Quaternions::Quaternion::__getitem__;
 %feature("python:slot", "mp_ass_subscript", functype="objobjargproc") Quaternions::Quaternion::__setitem__;
 %feature("python:slot", "tp_str",  functype="reprfunc") Quaternions::Quaternion::__str__;
 %feature("python:slot", "tp_repr", functype="reprfunc") Quaternions::Quaternion::__repr__;
+%feature("python:slot", "nb_divide") Quaternions::Quaternion::__div__;
+%feature("python:slot", "nb_floor_divide") Quaternions::Quaternion::__div__;
+%feature("python:slot", "nb_true_divide") Quaternions::Quaternion::__div__;
 #endif // SWIGPYTHON_BUILTIN
 %extend Quaternions::Quaternion {
   unsigned int __len__() const {
@@ -165,6 +168,11 @@
     def __rdiv__(self, t) :
         return self.inverse()*t
   };
+  #else
+  inline Quaternion __radd__(const double a) { return (*self)+a; }
+  inline Quaternion __rsub__(const double a) { return (-(*self))+a; }
+  inline Quaternion __rmul__(const double a) { return (*self)*a; }
+  inline Quaternion __rdiv__(const double a) { return (self->inverse())*a; }
   #endif
  };
 
