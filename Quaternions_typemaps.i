@@ -4,10 +4,10 @@
 //// The following translates between c++ and python types nicely ////
 //////////////////////////////////////////////////////////////////////
 
+#ifndef SWIGIMPORTED
 %include <typemaps.i>
 %include <stl.i>
 
-#ifndef SWIGIMPORTED
 // Use numpy below
 %include <numpy.i>
 %init %{
@@ -183,6 +183,19 @@
   }
 }
 
+%typemap(out) std::vector<Quaternions::Quaternion>& {
+  npy_intp size = $1->size();
+  $result = PyArray_SimpleNew(1, &size, NPY_OBJECT);
+  PyObject** data = static_cast<PyObject**>(PyArray_DATA((PyArrayObject*)$result));
+  for(npy_intp i=0; i<size; ++i) {
+    PyObject* qobj = SWIG_NewPointerObj((new Quaternions::Quaternion((*$1)[i])),
+					SWIGTYPE_p_Quaternions__Quaternion, SWIG_POINTER_OWN);
+    if(!qobj) {SWIG_fail;}
+    Py_INCREF(qobj);
+    data[i] = qobj;
+  }
+}
+
 %typemap (in,numinputs=0) std::vector<Quaternions::Quaternion>& Quaternion_argout (std::vector<Quaternions::Quaternion> vec_temp) {
   $1 = &vec_temp;
 }
@@ -202,11 +215,14 @@
 
 
 
+#ifndef SWIGIMPORTED
+
 %include <std_vector.i>
 %include "vector_typemaps.i"
-
 namespace std {
   // %template(vectorq) vector<Quaternions::Quaternion>;
   %template(vectord) vector<double>;
   %template(vectorvectord) vector<vector<double> >;
 };
+
+#endif

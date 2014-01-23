@@ -8,6 +8,8 @@
  // Quiet warnings about overloaded operators being ignored.
 #pragma SWIG nowarn=362,389,401,509
 
+#ifndef SWIGIMPORTED
+
 %{
   #define SWIG_FILE_WITH_INIT
   #include <vector>
@@ -91,6 +93,8 @@
   }
 }
 
+#endif // SWIGIMPORTED
+
 /////////////////////////////////////////////////
 //// These will be needed by the c++ wrapper ////
 /////////////////////////////////////////////////
@@ -102,9 +106,7 @@
   #include "IntegrateAngularVelocity.hpp"
 %}
 
-
 %include "Quaternions_typemaps.i"
-
 
 /////////////////////////////////////
 //// Import the quaternion class ////
