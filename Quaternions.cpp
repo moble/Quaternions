@@ -693,7 +693,7 @@ std::vector<Quaternion> Quaternions::Squad(const std::vector<Quaternion>& RIn, c
 }
 
 std::vector<Quaternion> Quaternions::FrameAngularVelocity(const std::vector<Quaternion>& f, const std::vector<double>& t) {
-  return 2.0*Quaternions::QuaternionDerivative(f, t)*f;
+  return 2.0*Quaternions::QuaternionDerivative(f, t)*Quaternions::conjugate(f);
 }
 
 
