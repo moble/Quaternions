@@ -125,7 +125,7 @@ std::vector<Quaternions::Quaternion> Quaternions::FrameFromAngularVelocity(const
       gsl_spline_free(splineZ);
       gsl_interp_accel_free(accZ);
       gsl_odeiv2_driver_free(d);
-      // cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": gsl_odeiv2_driver_apply returned an error; return value=" << status << "\n\n";
+      cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": gsl_odeiv2_driver_apply returned an error; return value=" << status << "\n\n";
       throw(FailedGSLCall);
     }
     rs.push_back(vector<double>(r, r+3));
