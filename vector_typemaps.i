@@ -23,7 +23,7 @@ const std::vector<TYPE>&  ARG_NAME {
       $1 = true;
     } else {
       PyObject* item = PySequence_GetItem($input, 0);
-      TYPE* temp;
+      TYPE* temp=0;
       $1 = SWIG_IsOK(SWIG_AsVal(TYPE)(item, temp));
     }
   }
@@ -82,7 +82,7 @@ const std::vector<std::vector<TYPE> >&  ARG_NAME {
 	$1 = true;
       } else {
 	PyObject* item1 = PySequence_GetItem(item0, 0);
-	TYPE* temp;
+	TYPE* temp=0;
 	$1 = SWIG_IsOK(SWIG_AsVal(TYPE)(item1, temp));
       }
     }
