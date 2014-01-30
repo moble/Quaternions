@@ -1201,6 +1201,76 @@ std::vector<std::vector<double> > Quaternions::vec(const std::vector<Quaternions
 #endif // DOXYGEN
 
 
+/// Returns the rapidity of a Lorentz boost with velocity three-vector v
+double Rapidity(const std::vector<double>& v) {
+  /// The vector v is expected to be the velocity three-vector of the
+  /// new frame relative to the current frame, in units where c=1.
+  const double magv = std::sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+  return acosh(1.0/std::sqrt(1.0-magv*magv));
+}
+
+/// Return a rotor taking the given vector into its boosted version
+Quaternions::Quaternion Quaternions::BoostRotor(std::vector<double> ThreeVelocity,
+						std::vector<double> ThreeVectorToBeBoosted) {
+  ///
+  /// \param ThreeVelocity Three-vector velocity of the new frame WRT this frame
+  /// \param ThreeVectorToBeBoosted Three-vector direction to be boosted by the rotor
+  ///
+  /// This function returns a rotor \f$R_b\f$ that takes the input
+  /// vector \f$\hat{w}\f$ (which will be normalized) -- considered as
+  /// a direction on the future null sphere -- into its boosted
+  /// version.  Note that this rotor is a function of both the vector
+  /// being boosted and the boost itself.
+  ///
+
+  const double alpha = Rapidity(ThreeVelocity);
+
+  // If ThreeVelocity is too small to make much difference, just return the identity
+  const double absThreeVelocity = std::sqrt(ThreeVelocity[0]*ThreeVelocity[0]
+					    +ThreeVelocity[1]*ThreeVelocity[1]
+					    +ThreeVelocity[2]*ThreeVelocity[2]);
+  if(absThreeVelocity<1.0e-14 || std::abs(1-std::exp(alpha))<1.0e-14) {
+    return Quaternion(1.0, 0.0, 0.0, 0.0);
+  }
+
+  // Otherwise, just normalize
+  ThreeVelocity[0] = ThreeVelocity[0]/absThreeVelocity;
+  ThreeVelocity[1] = ThreeVelocity[1]/absThreeVelocity;
+  ThreeVelocity[2] = ThreeVelocity[2]/absThreeVelocity;
+
+  // Normalize ThreeVectorToBeBoosted if possible
+  const double absThreeVectorToBeBoosted = std::sqrt(ThreeVectorToBeBoosted[0]*ThreeVectorToBeBoosted[0]
+						     +ThreeVectorToBeBoosted[1]*ThreeVectorToBeBoosted[1]
+						     +ThreeVectorToBeBoosted[2]*ThreeVectorToBeBoosted[2]);
+  if(absThreeVectorToBeBoosted==0.) {
+    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": |ThreeVectorToBeBoosted|=" << absThreeVectorToBeBoosted << " is too small." << endl;
+    throw(ValueError);
+  }
+  ThreeVectorToBeBoosted[0] = ThreeVectorToBeBoosted[0]/absThreeVectorToBeBoosted;
+  ThreeVectorToBeBoosted[1] = ThreeVectorToBeBoosted[1]/absThreeVectorToBeBoosted;
+  ThreeVectorToBeBoosted[2] = ThreeVectorToBeBoosted[2]/absThreeVectorToBeBoosted;
+
+  // Evaluate the angle between ThreeVectorToBeBoosted and ThreeVelocity
+  const double Theta = std::acos(ThreeVectorToBeBoosted[0]*ThreeVelocity[0]
+				 +ThreeVectorToBeBoosted[1]*ThreeVelocity[1]
+				 +ThreeVectorToBeBoosted[2]*ThreeVelocity[2]);
+
+  // Calculate the new angle between ThreeVectorToBeBoostedPrime and ThreeVelocity
+  const double ThetaPrime = 2 * std::atan( std::exp(alpha) * std::tan(0.5*Theta) );
+
+  // Evaluate the cross product; if it is too small, just return the identity
+  Quaternion ThreeVelocityThreeVectorToBeBoosted = Quaternion(ThreeVelocity).cross(Quaternion(ThreeVectorToBeBoosted));
+  const double absThreeVelocityThreeVectorToBeBoosted = ThreeVelocityThreeVectorToBeBoosted.abs();
+  if(absThreeVelocityThreeVectorToBeBoosted<1.0e-14) {
+    return Quaternion(1.0, 0.0, 0.0, 0.0);
+  }
+
+  return Quaternions::exp( 0.5*(ThetaPrime-Theta) * ThreeVelocityThreeVectorToBeBoosted.normalized() );
+}
+
+
+
+
 ///////////////////////////////////////////////
 // Derivative and integral utility functions //
 ///////////////////////////////////////////////

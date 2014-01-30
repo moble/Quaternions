@@ -169,6 +169,9 @@ namespace Quaternions {
 
   std::vector<Quaternion> QuaternionDerivative(const std::vector<Quaternion>& f, const std::vector<double>& t);
 
+  Quaternion BoostRotor(std::vector<double> ThreeVelocity,
+			std::vector<double> ThreeVectorToBeBoosted);
+
 } // namespace Quaternions
 
 #endif // QUATERNIONS_HPP

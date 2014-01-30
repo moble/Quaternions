@@ -17,7 +17,7 @@
 // #define  7
 // #define  8
 // #define  9
-// #define ValueError 10
+#define ValueError 10
 // #define BadSwitches 11
 #define IndexOutOfBounds 12
 // #define  13
