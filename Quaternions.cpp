@@ -1201,12 +1201,14 @@ std::vector<std::vector<double> > Quaternions::vec(const std::vector<Quaternions
 #endif // DOXYGEN
 
 
-/// Returns the rapidity of a Lorentz boost with velocity three-vector v
-double Rapidity(const std::vector<double>& v) {
-  /// The vector v is expected to be the velocity three-vector of the
-  /// new frame relative to the current frame, in units where c=1.
-  const double magv = std::sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
-  return acosh(1.0/std::sqrt(1.0-magv*magv));
+namespace {
+  /// Returns the rapidity of a Lorentz boost with velocity three-vector v
+  double Rapidity(const std::vector<double>& v) {
+    /// The vector v is expected to be the velocity three-vector of the
+    /// new frame relative to the current frame, in units where c=1.
+    const double magv = std::sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+    return acosh(1.0/std::sqrt(1.0-magv*magv));
+  }
 }
 
 /// Return a rotor taking the given vector into its boosted version
@@ -1223,7 +1225,7 @@ Quaternions::Quaternion Quaternions::BoostRotor(std::vector<double> ThreeVelocit
   /// being boosted and the boost itself.
   ///
 
-  const double alpha = Rapidity(ThreeVelocity);
+  const double alpha = ::Rapidity(ThreeVelocity);
 
   // If ThreeVelocity is too small to make much difference, just return the identity
   const double absThreeVelocity = std::sqrt(ThreeVelocity[0]*ThreeVelocity[0]
