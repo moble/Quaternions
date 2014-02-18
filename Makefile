@@ -6,8 +6,6 @@
 
 
 
-
-
 # By default, just call the python build process
 all :
 	python setup.py install --user

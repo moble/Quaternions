@@ -320,7 +320,7 @@ class doxy2docstring :
     
     def output_swig(self, OutputFileName):
         o = self.open_write(OutputFileName)
-        for key, value in self.documented_objects.iteritems():
+        for key, value in self.documented_objects.items():
             o.write('%feature("docstring") {0} """\n{1}"""\n\n'.format(key, value))
         o.close()
 
@@ -334,6 +334,6 @@ def main(input, output):
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
-        print __doc__
+        print(__doc__)
         sys.exit(1)
     main(sys.argv[1], sys.argv[2])
