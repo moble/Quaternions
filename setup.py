@@ -20,9 +20,11 @@ instance started in any directory on the system.
 from sys import argv
 if '--no-GSL' in argv:
     GSL=False
+    GSLDef = ''
     argv.remove('--no-GSL')
 else:
     GSL=True
+    GSLDef = '-DUSE_GSL'
 
 ## If PRD won't let me keep a subdirectory, make one
 from os.path import exists
@@ -72,9 +74,11 @@ IncDirs += [get_include()]
 # Add directories for GSL, if needed
 if GSL :
     SourceFiles = ['Quaternions.cpp',
+                   'Utilities.cpp',
                    'IntegrateAngularVelocity.cpp',
                    'Quaternions.i']
     Dependencies = ['Quaternions.hpp',
+                    'Utilities.hpp',
                     'IntegrateAngularVelocity.hpp',
                     'Quaternions_typemap.i']
     Libraries = ['gsl', 'gslcblas']
@@ -113,13 +117,14 @@ try :
 except IOError :
     License = 'See LICENSE file in the source code for details.'
 
-swig_opts=['-globals', 'constants', '-c++', '-builtin',]
+swig_opts=['-globals', 'constants', '-c++', '-builtin', GSLDef]
 try:
     import sys
     python_major = sys.version_info.major
     if(python_major==3) :
         swig_opts += ['-py3']
 except AttributeError:
+    print("Your version of python is so old.  How old is it?  So old I can't even tell how old it is.")
     pass # This should probably be an error, because python is really old, but let's keep trying...
 
 
@@ -130,11 +135,9 @@ setup(name="Quaternions",
       #long_description=""" """,
       author='Michael Boyle',
       author_email='boyle@astro.cornell.edu',
-      url='https://github.com/MOBle',
+      url='https://github.com/MOBle/Quaternions',
       license=License,
       packages = ['Quaternions'],
-      # py_modules = ['Quaternions'],
-      # scripts = ['Scripts/RunExtrapolations.py', 'Scripts/ConvertGWDatToH5.py'],
       ext_modules = [
         Extension('_Quaternions',
                   sources=SourceFiles,
@@ -144,11 +147,14 @@ setup(name="Quaternions",
                   libraries=Libraries,
                   #define_macros = [('CodeRevision', CodeRevision)],
                   language='c++',
-                  # swig_opts=['-globals', 'constants', '-c++',],# '-debug-tmsearch',],# '-debug-classes'],
                   swig_opts=swig_opts,
-                  extra_link_args=['-fPIC'],
-                  # extra_link_args=['-lgomp', '-fPIC', '-Wl,-undefined,error'], # `-undefined,error` tells the linker to fail on undefined symbols
-                  extra_compile_args=['-Wno-deprecated', '-ffast-math'] # NB: fast-math makes it impossible to detect NANs
+                  extra_link_args=['-fPIC'
+                                   '-Wl,-undefined,error', # fail on undefined symbols that I forgot to include
+                                   ],
+                  extra_compile_args=['-Wno-deprecated', # Numpy compilations always seem to involve deprecated things
+                                      '-Wno-null-conversion', # SWIG loves returning NULL as an int
+                                      '-ffast-math', # NB: fast-math makes it impossible to detect NANs
+                                      GSLDef]
                   )
         ],
       # classifiers = ,

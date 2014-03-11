@@ -15,8 +15,16 @@ no-GSL :
 	python setup.py install --user --no-GSL
 
 # If needed, we can also make object files to use in other C++ programs
-cpp : Quaternions.o IntegrateAngularVelocity.o
+cpp : Quaternions.o Utilities.o IntegrateAngularVelocity.o
 
+
+
+# Mike likes to use python's virtual environments to build with
+# various versions and arrangements of python.  As such, he finds that
+# the following is, unfortunately, necessary for him.  This makes him
+# happy.  It is probably not necessary for most users, however.
+MikeHappy :
+	$(VIRTUAL_ENV)/bin/python setup.py install --prefix=$(VIRTUAL_ENV)
 
 
 
@@ -69,7 +77,7 @@ cpp : Quaternions.o IntegrateAngularVelocity.o
 
 # This is how to build those object files
 %.o : %.cpp %.hpp Errors.hpp
-	$(C++) $(OPT) -c $(INCFLAGS) $< -o $@
+	$(C++) $(OPT) -c $(INCFLAGS) -DUSE_GSL $< -o $@
 
 # The following are just handy targets for removing compiled stuff
 clean :

@@ -111,6 +111,9 @@
 /////////////////////////////////////
 //// Import the quaternion class ////
 /////////////////////////////////////
+#define USE_GSL
+%apply double& OUTPUT { double& deltat };
+%apply Quaternions::Quaternion& Quaternion_argout { Quaternions::Quaternion& R_delta };
 #ifndef SWIGPYTHON_BUILTIN
 %ignore Quaternions::Quaternion::operator=;
 #endif

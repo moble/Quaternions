@@ -7,6 +7,8 @@
 #include <iostream>
 #include <iomanip>
 #include <math.h> // acosh is in math.h, but not cmath
+#include <algorithm>
+#include "Utilities.hpp"
 #include "Errors.hpp"
 
 
@@ -51,9 +53,9 @@ std::vector<double> ScalarIntegral(const std::vector<double>& fdot, const std::v
   return f;
 }
 
+#ifndef DOXYGEN
+// Some utility operators for std::vector, etc.
 inline double SQR(const double& x) { return x*x; }
-
-// Some utility operators for std::vector
 namespace Quaternions {
   std::vector<double> operator+(const std::vector<double>& v1, const std::vector<double>& v2) {
     const unsigned int size = v1.size();
@@ -103,6 +105,7 @@ namespace Quaternions {
     return d;
   }
 };
+#endif // DOXYGEN
 
 
 
@@ -236,9 +239,9 @@ double& Quaternions::Quaternion::operator[](const unsigned int i) {
 /// Quaternion multiplication.
 Quaternion Quaternions::Quaternion::operator*(const Quaternion& Q) const {
   return Quaternion(w*Q.w - x*Q.x - y*Q.y - z*Q.z,
-		    w*Q.x + x*Q.w + y*Q.z - z*Q.y,
-		    w*Q.y - x*Q.z + y*Q.w + z*Q.x,
-		    w*Q.z + x*Q.y - y*Q.x + z*Q.w);
+            w*Q.x + x*Q.w + y*Q.z - z*Q.y,
+            w*Q.y - x*Q.z + y*Q.w + z*Q.x,
+            w*Q.z + x*Q.y - y*Q.x + z*Q.w);
 }
 
 /// Return logarithm of Quaternion.
@@ -308,8 +311,8 @@ std::vector<Quaternion> Quaternions::DifferentiateRotorByLogarithm(const std::ve
     const double absquatlogRsquared = SQR(absquatlogR);
     const double a = SQR(std::sin(absquatlogR)/absquatlogR)/2.0;
     const double b = (absquatlogR<0.001
-		      ? 0.6666666666666666 + absquatlogRsquared*(-0.13333333333333333 + absquatlogRsquared*(0.012698412698412698 + (-0.0007054673721340388 + (4*absquatlogRsquared)/155925.)*absquatlogRsquared))
-		      : (absquatlogR-std::sin(absquatlogR)*std::cos(absquatlogR))/(absquatlogRsquared*absquatlogR) ) / 4.0;
+              ? 0.6666666666666666 + absquatlogRsquared*(-0.13333333333333333 + absquatlogRsquared*(0.012698412698412698 + (-0.0007054673721340388 + (4*absquatlogRsquared)/155925.)*absquatlogRsquared))
+              : (absquatlogR-std::sin(absquatlogR)*std::cos(absquatlogR))/(absquatlogRsquared*absquatlogR) ) / 4.0;
     const Quaternion comm = Quaternions::commutator(logR[i],rdot[i]);
     ROut[i] = (rdot[i] + a*comm + b*Quaternions::commutator(logR[i],comm)) * RIn[i];
   }
@@ -352,7 +355,7 @@ std::vector<Quaternion> Quaternions::MinimalRotation(const std::vector<Quaternio
 
 /// Input frame with prescribed rate of rotation about Z axis.
 std::vector<Quaternion> Quaternions::PrescribedRotation(const std::vector<double>& RotationRateAboutZ,
-						     const std::vector<Quaternion>& R, const std::vector<double>& T, const unsigned int NIterations) {
+                             const std::vector<Quaternion>& R, const std::vector<double>& T, const unsigned int NIterations) {
   ///
   /// \param RotationRateAboutZ Vector of rotation rates about the new frame's Z axis.
   /// \param R Vector of rotors.
@@ -367,8 +370,8 @@ std::vector<Quaternion> Quaternions::PrescribedRotation(const std::vector<double
 
   if(T.size() != R.size() || T.size() != RotationRateAboutZ.size()) {
     cerr << "\n\n" << __FILE__ << ":" << __LINE__
-	 << ": T.size()=" << T.size() << " != R.size()=" << R.size()
-	 << " != RotationRateAboutZ.size()=" << RotationRateAboutZ.size() << endl;
+     << ": T.size()=" << T.size() << " != R.size()=" << R.size()
+     << " != RotationRateAboutZ.size()=" << RotationRateAboutZ.size() << endl;
     throw(VectorSizeMismatch);
   }
   const unsigned int Size=T.size();
@@ -422,7 +425,7 @@ std::vector<Quaternion> Quaternions::FrameFromXY(const std::vector<Quaternion>& 
   for(unsigned int k=0; k<Size; ++k) {
     const Quaternion Ra = sqrtOfRotor(-X[k]*x);
     const double beta = std::atan2(Quaternions::dot(Ra*z*Ra.inverse(), Y[k]),
-				   Quaternions::dot(Ra*y*Ra.inverse(), Y[k]));
+                   Quaternions::dot(Ra*y*Ra.inverse(), Y[k]));
     R[k] = Ra * Quaternions::exp((beta/2.0)*x);
   }
   return R;
@@ -513,7 +516,7 @@ std::vector<double> Quaternions::FrameFromAngularVelocity_Integrand(const std::v
 
 // /// Time-derivative of quaternion logarithm for vector with given angular velocity
 // std::vector<double> Quaternions::FrameFromAngularVelocity_Integrand(const std::vector<double>& rfrak,
-// 								    const std::vector<double>& Omega) {
+//                     const std::vector<double>& Omega) {
 //   std::vector<double> rfrakDot(3);
 //   const double& rfrak_x = rfrak[0];
 //   const double& rfrak_y = rfrak[1];
@@ -545,8 +548,8 @@ std::vector<double> Quaternions::FrameFromAngularVelocity_Integrand(const std::v
 
 /// Time-derivative of 2-D quaternion logarithm for vector with given angular velocity
 void Quaternions::FrameFromAngularVelocity_2D_Integrand(const double rfrak_x, const double rfrak_y,
-							std::vector<double> Omega,
-							double& rfrakDot_x, double& rfrakDot_y) {
+                            std::vector<double> Omega,
+                            double& rfrakDot_x, double& rfrakDot_y) {
   const double rfrakMag = std::sqrt(rfrak_x*rfrak_x+rfrak_y*rfrak_y);
   if(std::abs(std::sin(rfrakMag)) < Quaternion_Epsilon) { // If the matrix is really close to singular, it's equivalent to the identity, so return
     rfrakDot_x = Omega[0]/2.0;
@@ -590,13 +593,17 @@ std::vector<Quaternion> Quaternions::UnflipRotors(const std::vector<Quaternion>&
   return Q;
 }
 
-/// Difference between frame rotors
-std::vector<Quaternion> Quaternions::RDelta(const std::vector<Quaternion>& R1, const std::vector<Quaternion>& R2, const unsigned int IndexOfFiducialTime) {
+/// Difference between frame rotors R1*R2.inverse()
+std::vector<Quaternion> Quaternions::RDelta(const std::vector<Quaternion>& R1, const std::vector<Quaternion>& R2, const int IndexOfFiducialTime) {
   ///
   /// \param R1 Vector of rotors
   /// \param R2 Vector of rotors
   /// \param IndexOfFiducialTime Integer index of time at which
-  ///        difference is set to zero [default: 0]
+  ///        difference is set to zero [default: -1]
+  ///
+  /// If the optional `IndexOfFiducialTime` is given, the returned
+  /// quantity is `R1*Offset*R2.inverse()`, where `Offset` is
+  /// `R1[I].inverse()*R2[I]`, thus ensuring that `RDelta[I]`=1.
   if(R1.size() != R2.size()) {
     cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": R1.size()=" << R1.size() << " != R2.size()=" << R2.size() << endl;
     throw(VectorSizeMismatch);
@@ -604,12 +611,18 @@ std::vector<Quaternion> Quaternions::RDelta(const std::vector<Quaternion>& R1, c
   if(R1.size()==0) {
     return vector<Quaternion>(0);
   }
-  if(R1.size()<=IndexOfFiducialTime) {
+  if(int(R1.size())<=IndexOfFiducialTime) {
     cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": R1.size()=" << R1.size() << " <= IndexOfFiducialTime=" << IndexOfFiducialTime << endl;
-    throw(VectorSizeMismatch);
+    throw(IndexOutOfBounds);
   }
   const unsigned int Size=R1.size();
   vector<Quaternion> Rd(Size);
+  if(IndexOfFiducialTime<0) {
+    for(unsigned int i=0; i<Size; ++i) {
+      Rd[i] = R1[i] * R2[i].inverse();
+    }
+    return Rd;
+  }
   const Quaternion Offset = R1[IndexOfFiducialTime].inverse() * R2[IndexOfFiducialTime];
   for(unsigned int i=0; i<Size; ++i) {
     Rd[i] = R1[i] * Offset * R2[i].inverse();
@@ -631,6 +644,11 @@ std::vector<Quaternion> Quaternions::Squad(const std::vector<Quaternion>& RIn, c
   if(RIn.size() != tIn.size()) {
     cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": RIn.size()=" << RIn.size() << " != tIn.size()=" << tIn.size() << endl;
     throw(VectorSizeMismatch);
+  }
+  if(tOut[0]<tIn[0] || tOut.back()>tIn.back()) {
+    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": (tOut[0]=" << tOut[0] << ") < (tIn[0]=" << tIn[0]
+         << ") || (tOut.back()=" << tOut.back() << ") > (tIn.back()=" << tIn.back() << ")" << endl;
+    throw(CannotExtrapolateQuaternions);
   }
   vector<Quaternion> ROut(tOut.size());
   unsigned int iIn = 0;
@@ -671,20 +689,20 @@ std::vector<Quaternion> Quaternions::Squad(const std::vector<Quaternion>& RIn, c
       Qip2 = RIn[iIn+2];
     }
     Ai = Qi * Quaternions::exp((
-		       Quaternions::log(Qi.inverse()*Qip1)
-		       +(Dti/Dtim1)*Quaternions::log(Qim1.inverse()*Qi)
-		       -2*Quaternions::log(Qi.inverse()*Qip1)
-		       )*0.25);
+                                Quaternions::log(Qi.inverse()*Qip1)
+                                +(Dti/Dtim1)*Quaternions::log(Qim1.inverse()*Qi)
+                                -2*Quaternions::log(Qi.inverse()*Qip1)
+                                )*0.25);
     Bip1 = Qip1 * Quaternions::exp((
-			   (Dti/Dtip1)*Quaternions::log(Qip1.inverse()*Qip2)
-			   +Quaternions::log(Qi.inverse()*Qip1)
-			   -2*Quaternions::log(Qi.inverse()*Qip1)
-			   )*-0.25);
+                                    (Dti/Dtip1)*Quaternions::log(Qip1.inverse()*Qip2)
+                                    +Quaternions::log(Qi.inverse()*Qip1)
+                                    -2*Quaternions::log(Qi.inverse()*Qip1)
+                                    )*-0.25);
     while(iOut<tOut.size() && tOut[iOut]<=tIn[iIn+1]) {
       const double taui = (tOut[iOut]-tIn[iIn]) / Dti;
       ROut[iOut] = Quaternions::Slerp(2*taui*(1-taui),
-				   Quaternions::Slerp(taui, Qi, Qip1),
-				   Quaternions::Slerp(taui, Ai, Bip1));
+                                      Quaternions::Slerp(taui, Qi, Qip1),
+                                      Quaternions::Slerp(taui, Ai, Bip1));
       iOut += 1;
     }
     iIn += 1;
@@ -695,6 +713,671 @@ std::vector<Quaternion> Quaternions::Squad(const std::vector<Quaternion>& RIn, c
 std::vector<Quaternion> Quaternions::FrameAngularVelocity(const std::vector<Quaternion>& f, const std::vector<double>& t) {
   return 2.0*Quaternions::QuaternionDerivative(f, t)*Quaternions::conjugate(f);
 }
+
+/// "Mean" rotor, minimizing "distance" between R(t) and R_mean
+Quaternion Quaternions::ApproximateMeanRotor(const std::vector<Quaternion>& R) {
+  /// \param R Vector of rotors to be averaged.
+  ///
+  /// The true mean of a rotor function of time can only be calculated
+  /// by an optimization algorithm because the metric is too
+  /// complicated to solve analytically.  Instead, this algorithm uses
+  /// a simple approximation that is true in the limit of `R(t)` being
+  /// constant.  In particular, the ideal mean would be calculated
+  /// using the `angle` between `R(t)` and `R_mean`; this function
+  /// minimizes the squared `sin` of half that angle.  Another way of
+  /// thinking of this is that this function isn't approximate; it
+  /// just uses a different metric, which is approximately equal to
+  /// what we would like to use.
+  ///
+  /// This algorithm calculates the averaging formula found in "Means
+  /// and averaging in the group of rotations"
+  /// <http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.16.5040>.
+  Quaternion Mean(0.,0.,0.,0.);
+  const unsigned int j=R.size();
+  for(unsigned int i=0; i<j; ++i) {
+    Mean += R[i];
+  }
+  return Mean.normalized();
+}
+
+/// "Mean" rotor, approximately minimizing integrated "distance" between R(t) and R_mean
+Quaternion Quaternions::ApproximateMeanRotor(const std::vector<Quaternion>& R, const std::vector<double>& t,
+                                             const double t1, const double t2) {
+  /// \param R Vector of rotors to be averaged.
+  /// \param t Vector of corresponding time steps.
+  /// \param t1 Optional early bound of time to average over
+  /// \param t2 Optional late bound of time to average over
+  ///
+  /// The true mean of a rotor function of time can only be calculated
+  /// by an optimization algorithm because the metric is too
+  /// complicated to solve analytically.  Instead, this algorithm uses
+  /// a simple approximation that is true in the limit of `R(t)` being
+  /// constant.  In particular, the ideal mean would be calculated
+  /// using the `angle` between `R(t)` and `R_mean`; this function
+  /// minimizes the squared `sin` of half that angle.  Another way of
+  /// thinking of this is that this function isn't approximate; it
+  /// just uses a different metric, which is approximately equal to
+  /// what we would like to use.
+  ///
+  /// This algorithm calculates the continuous limit of the averaging
+  /// formula found in "Means and averaging in the group of rotations"
+  /// <http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.16.5040>.
+  if(R.size() != t.size()) {
+    std::cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": R.size()=" << R.size() << " != t.size()=" << t.size() << std::endl;
+    throw(VectorSizeMismatch);
+  }
+  Quaternion Mean(0.,0.,0.,0.);
+  const unsigned int i1 = hunt(t, t1, 0);
+  const unsigned int i2 = hunt(t, t2, t.size()-1);
+  for(unsigned int i=i1+1; i<=i2; ++i) {
+    Mean += (t[i]-t[i-1])*(R[i]+R[i-1])/2.0;
+  }
+  return Mean.normalized();
+}
+
+/// Approximate Rdelta such that Rdelta*Rb is as nearly equal to Ra as possible
+Quaternion Quaternions::ApproximateOptimalAlignmentRotor(const std::vector<Quaternion>& Ra, const std::vector<Quaternion>& Rb,
+                                                         const std::vector<double>& t, const double t1, const double t2) {
+  /// \param Ra Vector of fixed rotors.
+  /// \param Rb Vector of rotors to be aligned to Ra.
+  /// \param t Vector of corresponding time steps.
+  /// \param t1 Optional early bound of time to average over
+  /// \param t2 Optional late bound of time to average over
+  ///
+  /// This routine essentially just returns the `MeanRotor` of the
+  /// difference between `Ra` and `Rb`.  The result is an `Rdelta`
+  /// which can be applied to `Rb`, by multiplication on the left, to
+  /// give a new time-series for `Rb` that is approximately as close
+  /// to `Ra` as possible.
+  if(Ra.size() != t.size() || Rb.size() != t.size()) {
+    std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+              << "\nRa.size()=" << Ra.size() << " != t.size()=" << t.size() << " or "
+              <<   "Rb.size()=" << Rb.size() << " != t.size()=" << t.size() << std::endl;
+    throw(VectorSizeMismatch);
+  }
+  return ApproximateMeanRotor(RDelta(Ra, Rb), t, t1, t2);
+}
+
+#ifdef USE_GSL
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_min.h>
+#include <gsl/gsl_multimin.h>
+
+void myGSLErrorHandler (const char * reason, const char * file, int line, int gsl_errno) {
+  std::cerr << "\n\n" << file << ":" << line << ": " << reason << std::endl;
+  throw(gsl_errno);
+}
+gsl_error_handler_t* defaultGSLErrorHandler = gsl_set_error_handler((gsl_error_handler_t*) &myGSLErrorHandler);
+
+#ifndef DOXYGEN
+// This is a local object used by AlignTimeAndFrame
+class RotorAligner {
+private:
+  std::vector<Quaternions::Quaternion> Ra;
+  std::vector<double> ta;
+  const std::vector<Quaternions::Quaternion>& Rb;
+  const std::vector<double>& tb;
+public:
+  RotorAligner(const std::vector<Quaternions::Quaternion>& RA)
+    : Ra(RA), ta(0), Rb(0), tb(0) { }
+  RotorAligner(double t1, double t2,
+               const std::vector<Quaternions::Quaternion>& RA, const std::vector<double>& tA,
+               const std::vector<Quaternions::Quaternion>& RB, const std::vector<double>& tB)
+    : Ra(RA), ta(tA), Rb(RB), tb(tB)
+  {
+    // Check to make sure we have sufficient times before any offset.
+    // (This is necessary but not sufficient for the method to work.)
+    if(t1<ta[0]) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": Alignment time t1=" << t1
+                << " does not occur in ta (which has ta[0]=" << ta[0] << ")." << std::endl;
+      throw(IndexOutOfBounds);
+    }
+    if(t2>ta.back()) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": Alignment time t2=" << t2
+                << " does not occur in ta (which has ta.back()=" << ta.back() << ")." << std::endl;
+      throw(IndexOutOfBounds);
+    }
+    if(tb.size()>0) {
+      if(t1<tb[0]) {
+        std::cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": Alignment time t1=" << t1
+                  << " does not occur in tb (which has tb[0]=" << tb[0] << ")." << std::endl;
+        throw(IndexOutOfBounds);
+      }
+      if(t2>tb.back()) {
+        std::cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": Alignment time t1=" << t1
+                  << " does not occur in tb (which has tb.back()=" << tb.back() << ")." << std::endl;
+        throw(IndexOutOfBounds);
+      }
+    }
+    // Trim the fixed frame (Ra) and its set of times, to which we
+    // will interpolate.
+    unsigned int i=ta.size()-1;
+    while(ta[i]>t2 && i>0) { --i; }
+    ta.erase(ta.begin()+i, ta.end());
+    Ra.erase(Ra.begin()+i, Ra.end());
+    i=0;
+    while(i<ta.size() && ta[i]<t1) { ++i; }
+    ta.erase(ta.begin(), ta.begin()+i);
+    Ra.erase(Ra.begin(), Ra.begin()+i);
+  }
+
+  Quaternions::Quaternion ApproximateOptimalR_delta(const double deltat) const {
+    using namespace Quaternions; // Allow me to subtract a double from a vector<double> below
+    const std::vector<Quaternions::Quaternion> Rb1 = Quaternions::Squad(Rb, tb+deltat, ta);
+    return ApproximateOptimalAlignmentRotor(Ra, Rb1, ta);
+  }
+
+  double EvaluateMinimizationQuantity(const double deltat) const {
+    using namespace Quaternions; // Allow me to subtract a double from a vector<double> below
+    const std::vector<Quaternions::Quaternion> Rb1 = Quaternions::Squad(Rb, tb+deltat, ta);
+    const Quaternion R_delta = ApproximateOptimalAlignmentRotor(Ra, Rb1, ta);
+    const std::vector<Quaternion> Rb2 = R_delta * Rb1;
+    const unsigned int Size=Rb2.size();
+    double f = 0.0;
+    double fdot_last = 4 * Quaternions::normsquared( Quaternions::log( Ra[0] * Quaternions::inverse(Rb2[0]) ) );
+    for(unsigned int i=1; i<Size; ++i) {
+      const double fdot = 4 * Quaternions::normsquared( Quaternions::log( Ra[i] * Quaternions::inverse(Rb2[i]) ) );
+      f += (ta[i]-ta[i-1])*(fdot+fdot_last)/2.0;
+      fdot_last = fdot;
+    }
+    return f;
+  }
+
+  double EvaluateMinimizationQuantity(const double deltax, const double deltay, const double deltaz) const {
+    const Quaternions::Quaternion R_mean = Quaternions::exp(Quaternions::Quaternion(0, deltax, deltay, deltaz));
+    const std::vector<Quaternions::Quaternion> Raprime = Ra * R_mean.inverse();
+    const unsigned int Size=Raprime.size();
+    double f = 0.0;
+    double fdot_last = 4 * Quaternions::normsquared( Quaternions::log( Raprime[0] ) );
+    for(unsigned int i=1; i<Size; ++i) {
+      const double fdot = 4 * Quaternions::normsquared( Quaternions::log( Raprime[i] ) );
+      f += (ta[i]-ta[i-1])*(fdot+fdot_last)/2.0;
+      fdot_last = fdot;
+    }
+    return f;
+  }
+
+  double EvaluateMinimizationQuantityWithoutTime(const double deltax, const double deltay, const double deltaz) const {
+    const Quaternions::Quaternion R_mean = Quaternions::exp(Quaternions::Quaternion(0, deltax, deltay, deltaz));
+    const std::vector<Quaternions::Quaternion> Raprime = Ra * R_mean.inverse();
+    const unsigned int Size=Raprime.size();
+    double f = 0.0;
+    for(unsigned int i=0; i<Size; ++i) {
+      f += 4 * Quaternions::normsquared( Quaternions::log( Raprime[i] ) );
+    }
+    return f;
+  }
+
+  double EvaluateMinimizationQuantity(const double deltat, const double deltax, const double deltay, const double deltaz) const {
+    std::cerr << __FILE__ << ":" << __LINE__ << "" << std::endl;
+    using namespace Quaternions; // Allow me to subtract a double from a vector<double> below
+    const Quaternions::Quaternion R_delta = Quaternions::exp(Quaternions::Quaternion(0, deltax, deltay, deltaz));
+    const std::vector<Quaternions::Quaternion> Rbprime = Quaternions::Squad(R_delta * Rb, tb+deltat, ta);
+    const unsigned int Size=Rbprime.size();
+    double f = 0.0;
+    std::cerr << __FILE__ << ":" << __LINE__ << ": R_delta="<<R_delta<< "\tRb[0]="<<Rb[0] << "\tdeltat="<<deltat << std::endl;
+    std::cerr << __FILE__ << ":" << __LINE__ << ": Ra[0]="<<Ra[0]<< "\tRbprime[0]="<<Rbprime[0] << "\tProduct="<<Ra[0] * Quaternions::inverse(Rbprime[0]) << std::endl;
+    double fdot_last = 4 * Quaternions::normsquared( Quaternions::log( Ra[0] * Quaternions::inverse(Rbprime[0]) ) );
+    std::cerr << __FILE__ << ":" << __LINE__ << "\n" << std::endl;
+    for(unsigned int i=1; i<Size; ++i) {
+      const double fdot = 4 * Quaternions::normsquared( Quaternions::log( Ra[i] * Quaternions::inverse(Rbprime[i]) ) );
+      f += (ta[i]-ta[i-1])*(fdot+fdot_last)/2.0;
+      fdot_last = fdot;
+    }
+    return f;
+  }
+};
+double minfunc1d (const double deltat, void* params) {
+  RotorAligner* Aligner = (RotorAligner*) params;
+  return Aligner->EvaluateMinimizationQuantity(deltat);
+}
+double minfunc3d (const gsl_vector* delta, void* params) {
+  RotorAligner* Aligner = (RotorAligner*) params;
+  return Aligner->EvaluateMinimizationQuantity(gsl_vector_get(delta,0),
+                                               gsl_vector_get(delta,1),
+                                               gsl_vector_get(delta,2));
+}
+double minfunc3d_NoTime (const gsl_vector* delta, void* params) {
+  RotorAligner* Aligner = (RotorAligner*) params;
+  return Aligner->EvaluateMinimizationQuantityWithoutTime(gsl_vector_get(delta,0),
+                                                          gsl_vector_get(delta,1),
+                                                          gsl_vector_get(delta,2));
+}
+double minfunc4d (const gsl_vector* delta, void* params) {
+  RotorAligner* Aligner = (RotorAligner*) params;
+  std::cerr << __FILE__ << ":" << __LINE__ << "" << std::endl;
+  return Aligner->EvaluateMinimizationQuantity(gsl_vector_get(delta,0),
+                                               gsl_vector_get(delta,1),
+                                               gsl_vector_get(delta,2),
+                                               gsl_vector_get(delta,3));
+}
+#endif // DOXYGEN
+
+/// Time and rotor offsets such that Rdelta*Rb(t+deltat) is as close to Ra(t) as possible
+void Quaternions::ApproximateOptimalAlignment(const double t1, const double t2,
+                                              const std::vector<Quaternion>& Ra, const std::vector<double>& ta,
+                                              const std::vector<Quaternion>& Rb, const std::vector<double>& tb,
+                                              double& deltat, Quaternions::Quaternion& R_delta) {
+  /// \param t1 Early bound of time to average over
+  /// \param t2 Late bound of time to average over
+  /// \param Ra Vector of fixed rotors.
+  /// \param ta Vector of corresponding time steps.
+  /// \param Rb Vector of rotors to be aligned to Ra.
+  /// \param tb Vector of corresponding time steps.
+  /// \param deltat Output optimal time offset
+  /// \param R_delta Output optimal rotor
+  ///
+  /// This routine actively optimizes over the time offset of `Rb` and
+  /// approximately optimizes over the rotational degrees of freedom
+  /// in `Rb` such that Rdelta*Rb(t+deltat) is as close to Ra(t) as
+  /// possible.  The rotational optimization for any given time offset
+  /// is performed analytically by the routine
+  /// `ApproximateOptimalAlignmentRotor`.
+
+  int status=GSL_CONTINUE;
+  int iter = 0, max_iter = 100;
+  const double epsabs=1.e-8, epsrel=1.e-9;
+  const gsl_min_fminimizer_type *T;
+  gsl_min_fminimizer *s;
+
+  const RotorAligner Aligner(t1, t2, Ra, ta, Rb, tb);
+
+  gsl_function F;
+  F.function = &minfunc1d;
+  F.params = (void*) &Aligner;
+
+  // Initial guess for the location of the minimum
+  double m = 0.0;
+
+  // Set the bounds to ensure that ta[0]+deltat<t1 and
+  // ta[-1]+deltat>t2, which mean t2-ta[-1] < deltat < t1-ta[0].
+  // Also, don't search more than (t2-t1) to either left or right.
+  double a = std::max(t2-ta.back(), t1-t2);
+  double b = std::min(t1-ta[0], t2-t1);
+  // std::cerr << __FILE__ << ":" << __LINE__ << ": a=" << a << " b=" << b << " m=" << m << std::endl;
+  // std::cerr << __FILE__ << ":" << __LINE__ << ": F(a)=" << minfunc1d(a,F.params) << " F(b)=" << minfunc1d(b,F.params) << " F(m)=" << minfunc1d(m,F.params) << std::endl;
+
+  T = gsl_min_fminimizer_brent;
+  s = gsl_min_fminimizer_alloc(T);
+  try {
+    gsl_min_fminimizer_set(s, &F, m, a, b);
+  } catch(int i) {
+    std::cerr << __FILE__ << ":" << __LINE__ << ": Error code=`" << i
+              << "`.\n    That's probably `" << GSL_EINVAL << "` because of an invalid initial guess for the minimizer;"
+              <<          " F(deltat=" << m << ")=" << minfunc1d(m,F.params) << " is"
+              <<   "\n    a worse value than one or both of the endpoints [F(deltat=" << a << ")=" << minfunc1d(a,F.params)
+              <<          "; F(deltat=" << b << ")=" << minfunc1d(b,F.params) << "]."
+              <<   "\n    Try a better rough initial alignment, or increasing the distance between t1 and t2." << std::endl;
+    throw(FailedGSLCall);
+  }
+  while (status == GSL_CONTINUE && iter < max_iter) {
+    iter++;
+    status = gsl_min_fminimizer_iterate(s);
+
+    if(status==GSL_EBADFUNC) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << ":\nThe iteration encountered a singular point where the function evaluated to Inf or NaN"
+                << "\nwhile minimizing with (" << a << "," << m << "," << b << ")." << std::endl;
+    }
+
+    if(status==GSL_FAILURE) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << ":\nThe algorithm could not improve the current best approximation or bounding interval." << std::endl;
+    }
+
+    m = gsl_min_fminimizer_x_minimum(s);
+    a = gsl_min_fminimizer_x_lower(s);
+    b = gsl_min_fminimizer_x_upper(s);
+
+    status = gsl_min_test_interval(a, b, epsabs, epsrel);
+
+    // if (status == GSL_SUCCESS) printf ("Converged:\n");
+    // printf ("%5d [%.7f, %.7f] %.7f %.7f\n", iter, a, b, m, b - a);
+  }
+
+  gsl_min_fminimizer_free(s);
+
+  deltat = m;
+  R_delta = Aligner.ApproximateOptimalR_delta(deltat);
+
+  return;
+}
+
+/// Time and rotor offsets such that Rdelta*Rb(t+deltat) is as close to Ra(t) as possible
+void Quaternions::OptimalAlignment(const double t1, const double t2,
+                                   const std::vector<Quaternion>& Ra, const std::vector<double>& ta,
+                                   const std::vector<Quaternion>& Rb, const std::vector<double>& tb,
+                                   double& deltat, Quaternions::Quaternion& R_delta) {
+  /// \param t1 Initial bound of alignment range
+  /// \param t2 Final bound of alignment range
+  /// \param Ra Vector of fixed rotors.
+  /// \param ta Vector of corresponding time steps.
+  /// \param Rb Vector of rotors to be aligned to Ra.
+  /// \param tb Vector of corresponding time steps.
+  /// \param deltat Output optimal time offset
+  /// \param R_delta Output optimal rotor
+  ///
+  /// This routine actively optimizes the time offset and all three
+  /// rotational degrees of freedom for `Rb`, so that
+  /// `Rdelta*Rb(t+deltat)` is as close to `Ra(t)` as possible over
+  /// the range (t1, t2).  The error measure is just the usual
+  /// `angle(UnflipRotors(RDelta(Ra,Rb)))` integrated over `(t1,t2)`.
+
+  // Start with initial guess from ApproximateOptimalAlignment
+  ApproximateOptimalAlignment(t1, t2, Ra, ta, Rb, tb, deltat, R_delta);
+
+  const RotorAligner Aligner(t1, t2, Ra, ta, Rb, tb);
+  const unsigned int NDimensions = 4;
+  const unsigned int MaxIterations = 2000;
+  const double MinSimplexSize = 1.0e-10;
+
+  // Don't try to offset by more than (t2-t1), or (t1-ta[0]), or
+  // (ta.back()-t2).  The minimization might try to take twice this
+  // step, so let's cut that range down further -- by a factor 2.5;
+  const double InitialTrialTimeStep = std::min(t2-t1, std::min(t1-ta[0], ta.back()-t2))/2.5;
+  const double InitialTrialAngleStep = 1.0;
+
+  // Use Nelder-Mead simplex minimization
+  const gsl_multimin_fminimizer_type* T =
+    gsl_multimin_fminimizer_nmsimplex2;
+  gsl_multimin_fminimizer* s = NULL;
+  gsl_vector* ss;
+  gsl_vector* x;
+  gsl_multimin_function min_func;
+  size_t iter = 0;
+  int status = GSL_CONTINUE;
+  double size = 0.0;
+
+  // Set initial values
+  {
+    // std::cerr << __FILE__ << ":" << __LINE__ << ": R_delta=" << R_delta << "; R_delta.log()=" << R_delta.log() << std::endl;
+    const Quaternions::Quaternion R_delta_log = R_delta.log();
+    x = gsl_vector_alloc(NDimensions);
+    gsl_vector_set(x, 0, deltat);
+    gsl_vector_set(x, 1, R_delta_log[1]);
+    gsl_vector_set(x, 2, R_delta_log[2]);
+    gsl_vector_set(x, 3, R_delta_log[3]);
+  }
+
+  // Set initial step sizes
+  ss = gsl_vector_alloc(NDimensions);
+  gsl_vector_set(ss, 0, InitialTrialTimeStep);
+  gsl_vector_set(ss, 1, InitialTrialAngleStep);
+  gsl_vector_set(ss, 2, InitialTrialAngleStep);
+  gsl_vector_set(ss, 3, InitialTrialAngleStep);
+
+  min_func.n = NDimensions;
+  min_func.f = &minfunc4d;
+  min_func.params = (void*) &Aligner;
+
+  s = gsl_multimin_fminimizer_alloc(T, NDimensions);
+  gsl_multimin_fminimizer_set(s, &min_func, x, ss);
+
+  // Run the minimization
+  while(status == GSL_CONTINUE && iter < MaxIterations) {
+    iter++;
+    std::cerr << __FILE__ << ":" << __LINE__ << "" << std::endl;
+    status = gsl_multimin_fminimizer_iterate(s);
+    std::cerr << __FILE__ << ":" << __LINE__ << "" << std::endl;
+
+    if(status==GSL_EBADFUNC) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << ":\nThe iteration encountered a singular point where the function evaluated to Inf or NaN"
+                << "\nwhile minimizing at (" << gsl_vector_get(s->x, 0) << ", " << gsl_vector_get(s->x, 1)
+                << ", " << gsl_vector_get(s->x, 2) << ", " << gsl_vector_get(s->x, 3) << ")." << std::endl;
+    }
+
+    if(status==GSL_FAILURE) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << ":\nThe algorithm could not improve the current best approximation or bounding interval." << std::endl;
+    }
+
+    if(status==GSL_ENOPROG) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << ":\nThe minimizer is unable to improve on its current estimate, either due to"
+                << "\nnumerical difficulty or because a genuine local minimum has been reached." << std::endl;
+    }
+
+    if(status) break;
+    size = gsl_multimin_fminimizer_size(s);
+    status = gsl_multimin_test_size(size, MinSimplexSize);
+
+    // std::cerr << iter << ": " << std::setprecision(15);
+    // for(unsigned int k=0; k<NDimensions; ++k)
+    //   std::cerr << gsl_vector_get(s->x, k) << " ";
+    // std::cerr << std::endl;
+  }
+
+  // Get time shift and rotation
+  deltat = gsl_vector_get(s->x, 0);
+  R_delta = Quaternions::exp(Quaternions::Quaternion(0.0, gsl_vector_get(s->x, 1), gsl_vector_get(s->x, 2), gsl_vector_get(s->x, 3)));
+
+  // Free allocated memory
+  gsl_vector_free(x);
+  gsl_vector_free(ss);
+  gsl_multimin_fminimizer_free(s);
+
+  return;
+}
+
+/// Mean rotor, minimizing integrated distance between R(t_i) and R_mean
+Quaternion Quaternions::MeanRotor(const std::vector<Quaternion>& R) {
+  /// \param R Vector of rotors to be averaged.
+  ///
+  /// This algorithm minimizes the integrated distance between the
+  /// input data's `R(t)` and `R_mean` by varying `R_mean` and finding
+  /// the minimum using the Nedler-Mead simplex algorithm(2) of GSL.
+  /// This is the correct generalization of the similar
+  /// `ApproximateMeanRotor` function, and is essentially described in
+  /// my paper <http://arxiv.org/abs/1302.2919/>.
+
+  // Start with initial guess from ApproximateOptimalAlignment
+  Quaternions::Quaternion R_mean = ApproximateMeanRotor(R);
+
+  const unsigned int MaxIterations = 2000;
+  const double MinSimplexSize = 1.0e-8;
+  const double InitialTrialAngleStep = 1.0;
+
+  const RotorAligner Aligner(R);
+  const unsigned int NDimensions = 3;
+
+  // Use Nelder-Mead simplex minimization
+  const gsl_multimin_fminimizer_type* T =
+    gsl_multimin_fminimizer_nmsimplex2;
+  gsl_multimin_fminimizer* s = NULL;
+  gsl_vector* ss;
+  gsl_vector* x;
+  gsl_multimin_function min_func;
+  size_t iter = 0;
+  int status = GSL_CONTINUE;
+  double size = 0.0;
+
+  // Set initial values
+  {
+    const Quaternions::Quaternion R_mean_log = R_mean.log();
+    x = gsl_vector_alloc(NDimensions);
+    gsl_vector_set(x, 0, R_mean_log[1]);
+    gsl_vector_set(x, 1, R_mean_log[2]);
+    gsl_vector_set(x, 2, R_mean_log[3]);
+  }
+
+  // Set initial step sizes
+  ss = gsl_vector_alloc(NDimensions);
+  gsl_vector_set(ss, 0, InitialTrialAngleStep);
+  gsl_vector_set(ss, 1, InitialTrialAngleStep);
+  gsl_vector_set(ss, 2, InitialTrialAngleStep);
+
+  min_func.n = NDimensions;
+  min_func.f = &minfunc3d_NoTime;
+  min_func.params = (void*) &Aligner;
+
+  s = gsl_multimin_fminimizer_alloc(T, NDimensions);
+  gsl_multimin_fminimizer_set(s, &min_func, x, ss);
+
+  // Run the minimization
+  while(status == GSL_CONTINUE && iter < MaxIterations) {
+    iter++;
+    status = gsl_multimin_fminimizer_iterate(s);
+
+    // size = gsl_multimin_fminimizer_size(s);
+    // std::cerr << iter << ": " << status << " " << std::setprecision(15) << size << " ";
+    // for(unsigned int k=0; k<NDimensions; ++k)
+    //   std::cerr << gsl_vector_get(s->x, k) << " ";
+    // std::cerr << std::endl;
+
+    if(status==GSL_EBADFUNC) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << ":\nThe iteration encountered a singular point where the function evaluated to Inf or NaN"
+                << "\nwhile minimizing at (" << gsl_vector_get(s->x, 0) << ", " << gsl_vector_get(s->x, 1)
+                << ", " << gsl_vector_get(s->x, 2) << ")." << std::endl;
+    } else if(status==GSL_FAILURE) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << ":\nThe algorithm could not improve the current best approximation or bounding interval." << std::endl;
+    } else if(status==GSL_ENOPROG) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << ":\nThe minimizer is unable to improve on its current estimate, either due to"
+                << "\nnumerical difficulty or because a genuine local minimum has been reached." << std::endl;
+    } else if(status) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << ":\nUnkown minimization status=" << status << std::endl;
+      break;
+    }
+
+    size = gsl_multimin_fminimizer_size(s);
+    status = gsl_multimin_test_size(size, MinSimplexSize);
+    // if(status!=GSL_CONTINUE) {
+    //   std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+    //             << ":\nsize=" << size << "\tMinSimplexSize=" << MinSimplexSize << "\tstatus=" << status << std::endl;
+    // }
+  }
+
+  // Get time shift and rotation
+  R_mean = Quaternions::exp(Quaternions::Quaternion(0.0, gsl_vector_get(s->x, 0), gsl_vector_get(s->x, 1), gsl_vector_get(s->x, 2)));
+
+  // Free allocated memory
+  gsl_vector_free(x);
+  gsl_vector_free(ss);
+  gsl_multimin_fminimizer_free(s);
+
+  return R_mean;
+}
+
+/// Mean rotor, minimizing integrated distance between R(t) and R_mean
+Quaternion Quaternions::MeanRotor(const std::vector<Quaternion>& R, const std::vector<double>& t,
+                                  double t1, double t2) {
+  /// \param R Vector of rotors to be averaged.
+  /// \param t Vector of corresponding time steps.
+  /// \param t1 Optional early bound of time to average over
+  /// \param t2 Optional late bound of time to average over
+  ///
+  /// This algorithm minimizes the integrated distance between the
+  /// input data's `R(t)` and `R_mean` by varying `R_mean` and finding
+  /// the minimum using the Nedler-Mead simplex algorithm(2) of GSL.
+  /// This is the correct generalization of the similar
+  /// `ApproximateMeanRotor` function, and is essentially described in
+  /// my paper <http://arxiv.org/abs/1302.2919/>.
+
+  // Make sure we have actual bounds for the time
+  if(t1==-1e300) {
+    t1 = t[0];
+  }
+  if(t2==1e300) {
+    t2 = t.back();
+  }
+
+  // Start with initial guess from ApproximateOptimalAlignment
+  Quaternions::Quaternion R_mean = ApproximateMeanRotor(R, t, t1, t2);
+
+  const unsigned int MaxIterations = 2000;
+  const double MinSimplexSize = 1.0e-8;
+  const double InitialTrialAngleStep = 1.0;
+
+  const std::vector<Quaternions::Quaternion> Rb;
+  const std::vector<double> tb(0);
+  const RotorAligner Aligner(t1, t2, R, t, Rb, tb);
+  const unsigned int NDimensions = 3;
+
+  // Use Nelder-Mead simplex minimization
+  const gsl_multimin_fminimizer_type* T =
+    gsl_multimin_fminimizer_nmsimplex2;
+  gsl_multimin_fminimizer* s = NULL;
+  gsl_vector* ss;
+  gsl_vector* x;
+  gsl_multimin_function min_func;
+  size_t iter = 0;
+  int status = GSL_CONTINUE;
+  double size = 0.0;
+
+  // Set initial values
+  {
+    const Quaternions::Quaternion R_mean_log = R_mean.log();
+    x = gsl_vector_alloc(NDimensions);
+    gsl_vector_set(x, 0, R_mean_log[1]);
+    gsl_vector_set(x, 1, R_mean_log[2]);
+    gsl_vector_set(x, 2, R_mean_log[3]);
+  }
+
+  // Set initial step sizes
+  ss = gsl_vector_alloc(NDimensions);
+  gsl_vector_set(ss, 0, InitialTrialAngleStep);
+  gsl_vector_set(ss, 1, InitialTrialAngleStep);
+  gsl_vector_set(ss, 2, InitialTrialAngleStep);
+
+  min_func.n = NDimensions;
+  min_func.f = &minfunc3d;
+  min_func.params = (void*) &Aligner;
+
+  s = gsl_multimin_fminimizer_alloc(T, NDimensions);
+  gsl_multimin_fminimizer_set(s, &min_func, x, ss);
+
+  // Run the minimization
+  while(status == GSL_CONTINUE && iter < MaxIterations) {
+    iter++;
+    status = gsl_multimin_fminimizer_iterate(s);
+
+    // size = gsl_multimin_fminimizer_size(s);
+    // std::cerr << iter << ": " << status << " " << std::setprecision(15) << size << " ";
+    // for(unsigned int k=0; k<NDimensions; ++k)
+    //   std::cerr << gsl_vector_get(s->x, k) << " ";
+    // std::cerr << std::endl;
+
+    if(status==GSL_EBADFUNC) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << ":\nThe iteration encountered a singular point where the function evaluated to Inf or NaN"
+                << "\nwhile minimizing at (" << gsl_vector_get(s->x, 0) << ", " << gsl_vector_get(s->x, 1)
+                << ", " << gsl_vector_get(s->x, 2) << ")." << std::endl;
+    } else if(status==GSL_FAILURE) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << ":\nThe algorithm could not improve the current best approximation or bounding interval." << std::endl;
+    } else if(status==GSL_ENOPROG) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << ":\nThe minimizer is unable to improve on its current estimate, either due to"
+                << "\nnumerical difficulty or because a genuine local minimum has been reached." << std::endl;
+    } else if(status) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << ":\nUnkown minimization status=" << status << std::endl;
+      break;
+    }
+
+    size = gsl_multimin_fminimizer_size(s);
+    status = gsl_multimin_test_size(size, MinSimplexSize);
+    // if(status!=GSL_CONTINUE) {
+    //   std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+    //             << ":\nsize=" << size << "\tMinSimplexSize=" << MinSimplexSize << "\tstatus=" << status << std::endl;
+    // }
+  }
+
+  // Get time shift and rotation
+  R_mean = Quaternions::exp(Quaternions::Quaternion(0.0, gsl_vector_get(s->x, 0), gsl_vector_get(s->x, 1), gsl_vector_get(s->x, 2)));
+
+  // Free allocated memory
+  gsl_vector_free(x);
+  gsl_vector_free(ss);
+  gsl_multimin_fminimizer_free(s);
+
+  return R_mean;
+}
+#endif // USE_GSL
 
 
 #ifndef DOXYGEN
@@ -1213,7 +1896,7 @@ namespace {
 
 /// Return a rotor taking the given vector into its boosted version
 Quaternions::Quaternion Quaternions::BoostRotor(std::vector<double> ThreeVelocity,
-						std::vector<double> ThreeVectorToBeBoosted) {
+                        std::vector<double> ThreeVectorToBeBoosted) {
   ///
   /// \param ThreeVelocity Three-vector velocity of the new frame WRT this frame
   /// \param ThreeVectorToBeBoosted Three-vector direction to be boosted by the rotor
@@ -1229,8 +1912,8 @@ Quaternions::Quaternion Quaternions::BoostRotor(std::vector<double> ThreeVelocit
 
   // If ThreeVelocity is too small to make much difference, just return the identity
   const double absThreeVelocity = std::sqrt(ThreeVelocity[0]*ThreeVelocity[0]
-					    +ThreeVelocity[1]*ThreeVelocity[1]
-					    +ThreeVelocity[2]*ThreeVelocity[2]);
+                        +ThreeVelocity[1]*ThreeVelocity[1]
+                        +ThreeVelocity[2]*ThreeVelocity[2]);
   if(absThreeVelocity<1.0e-14 || std::abs(1-std::exp(alpha))<1.0e-14) {
     return Quaternion(1.0, 0.0, 0.0, 0.0);
   }
@@ -1242,8 +1925,8 @@ Quaternions::Quaternion Quaternions::BoostRotor(std::vector<double> ThreeVelocit
 
   // Normalize ThreeVectorToBeBoosted if possible
   const double absThreeVectorToBeBoosted = std::sqrt(ThreeVectorToBeBoosted[0]*ThreeVectorToBeBoosted[0]
-						     +ThreeVectorToBeBoosted[1]*ThreeVectorToBeBoosted[1]
-						     +ThreeVectorToBeBoosted[2]*ThreeVectorToBeBoosted[2]);
+                             +ThreeVectorToBeBoosted[1]*ThreeVectorToBeBoosted[1]
+                             +ThreeVectorToBeBoosted[2]*ThreeVectorToBeBoosted[2]);
   if(absThreeVectorToBeBoosted==0.) {
     cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": |ThreeVectorToBeBoosted|=" << absThreeVectorToBeBoosted << " is too small." << endl;
     throw(ValueError);
@@ -1254,8 +1937,8 @@ Quaternions::Quaternion Quaternions::BoostRotor(std::vector<double> ThreeVelocit
 
   // Evaluate the angle between ThreeVectorToBeBoosted and ThreeVelocity
   const double Theta = std::acos(ThreeVectorToBeBoosted[0]*ThreeVelocity[0]
-				 +ThreeVectorToBeBoosted[1]*ThreeVelocity[1]
-				 +ThreeVectorToBeBoosted[2]*ThreeVelocity[2]);
+                 +ThreeVectorToBeBoosted[1]*ThreeVelocity[1]
+                 +ThreeVectorToBeBoosted[2]*ThreeVelocity[2]);
 
   // Calculate the new angle between ThreeVectorToBeBoostedPrime and ThreeVelocity
   const double ThetaPrime = 2 * std::atan( std::exp(alpha) * std::tan(0.5*Theta) );

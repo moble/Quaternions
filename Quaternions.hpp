@@ -27,6 +27,7 @@ namespace Quaternions {
     explicit Quaternion(const double angle, const std::vector<double>& axis); // explicit for python safety
   public: // Access and manipulation
     Quaternion& operator=(const Quaternion& Q) { w=Q.w; x=Q.x; y=Q.y; z=Q.z; return *this; }
+    Quaternion& operator+=(const Quaternion& Q) { w+=Q.w; x+=Q.x; y+=Q.y; z+=Q.z; return *this; }
     double operator[](const unsigned int i) const;
     double& operator[](const unsigned int i);
     inline bool operator!=(const Quaternion& Q) const { if(w!=Q.w) return false; if(x!=Q.x) return false; if(y!=Q.y) return false; if(z!=Q.z) return false; return true; }
@@ -91,16 +92,34 @@ namespace Quaternions {
   std::vector<Quaternion> DifferentiateRotorByLogarithm(const std::vector<Quaternion>& RIn, const std::vector<double>& tIn);
   std::vector<Quaternion> MinimalRotation(const std::vector<Quaternion>& R, const std::vector<double>& T, const unsigned int NIterations=5);
   std::vector<Quaternion> PrescribedRotation(const std::vector<double>& RotationRateAboutZ,
-					     const std::vector<Quaternion>& R, const std::vector<double>& T, const unsigned int NIterations=5);
+                                             const std::vector<Quaternion>& R, const std::vector<double>& T, const unsigned int NIterations=5);
   std::vector<Quaternion> FrameFromXY(const std::vector<Quaternion>& X, const std::vector<Quaternion>& Y);
   std::vector<Quaternion> FrameFromZ(const std::vector<Quaternion>& Z, const std::vector<double>& T, const unsigned int NIterations=5);
   std::vector<Quaternion> FrameFromPrescribedRotation(const std::vector<Quaternion>& omega, const std::vector<double>& T, const unsigned int NIterations=5);
   std::vector<double> FrameFromAngularVelocity_Integrand(const std::vector<double>& r, const std::vector<double>& Omega);
   void FrameFromAngularVelocity_2D_Integrand(const double r_x, const double r_y, std::vector<double> Omega, double& rdot_x, double& rdot_y);
   std::vector<Quaternion> UnflipRotors(const std::vector<Quaternion>& R, const double discont=1.4142135623730951);
-  std::vector<Quaternion> RDelta(const std::vector<Quaternion>& R1, const std::vector<Quaternion>& R2, const unsigned int IndexOfFiducialTime=0);
+  std::vector<Quaternion> RDelta(const std::vector<Quaternion>& R1, const std::vector<Quaternion>& R2, const int IndexOfFiducialTime=-1);
   std::vector<Quaternion> Squad(const std::vector<Quaternion>& RIn, const std::vector<double>& tIn, const std::vector<double>& tOut);
   std::vector<Quaternion> FrameAngularVelocity(const std::vector<Quaternion>& f, const std::vector<double>& t);
+  Quaternion ApproximateMeanRotor(const std::vector<Quaternion>& R);
+  Quaternion ApproximateMeanRotor(const std::vector<Quaternion>& R, const std::vector<double>& t,
+                                  const double t1=-1e300, const double t2=1e300);
+  Quaternion ApproximateOptimalAlignmentRotor(const std::vector<Quaternion>& Ra, const std::vector<Quaternion>& Rb,
+                                              const std::vector<double>& t, const double t1=-1e300, const double t2=1e300);
+  #ifdef USE_GSL
+  void ApproximateOptimalAlignment(const double t1, const double t2,
+                                   const std::vector<Quaternion>& Ra, const std::vector<double>& ta,
+                                   const std::vector<Quaternion>& Rb, const std::vector<double>& tb,
+                                   double& deltat, Quaternions::Quaternion& R_delta);
+  void OptimalAlignment(const double t1, const double t2,
+                        const std::vector<Quaternion>& Ra, const std::vector<double>& ta,
+                        const std::vector<Quaternion>& Rb, const std::vector<double>& tb,
+                        double& deltat, Quaternions::Quaternion& R_delta);
+  Quaternion MeanRotor(const std::vector<Quaternion>& R);
+  Quaternion MeanRotor(const std::vector<Quaternion>& R, const std::vector<double>& t,
+                       double t1=-1e300, double t2=1e300);
+  #endif // USE_GSL
 
   std::vector<Quaternion> operator+(const double a, const std::vector<Quaternion>& Q);
   std::vector<Quaternion> operator-(const double a, const std::vector<Quaternion>& Q);
@@ -170,7 +189,7 @@ namespace Quaternions {
   std::vector<Quaternion> QuaternionDerivative(const std::vector<Quaternion>& f, const std::vector<double>& t);
 
   Quaternion BoostRotor(std::vector<double> ThreeVelocity,
-			std::vector<double> ThreeVectorToBeBoosted);
+            std::vector<double> ThreeVectorToBeBoosted);
 
 } // namespace Quaternions
 

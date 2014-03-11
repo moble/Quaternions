@@ -48,7 +48,7 @@
       if(!SWIG_IsOK(SWIG_AsVal(double)(item, &tmp[i]))) {
         Py_DECREF(item);
         SWIG_exception(SWIG_TypeError, "expected items of sequence to be of type "\
-    		     "\"double\" in argument $argnum");
+                     "\"double\" in argument $argnum");
       }
       Py_DECREF(item);
     }
@@ -90,7 +90,7 @@
       if(!SWIG_IsOK(SWIG_AsVal(double)(item, &tmp[i]))) {
         Py_DECREF(item);
         SWIG_exception(SWIG_TypeError, "expected items of sequence to be of type "\
-    		     "\"double\" in argument $argnum");
+                     "\"double\" in argument $argnum");
       }
       Py_DECREF(item);
     }
@@ -110,6 +110,17 @@
   }
 }
 
+%typemap (in,numinputs=0) Quaternions::Quaternion& Quaternion_argout (Quaternions::Quaternion quat_temp) {
+  $1 = &quat_temp;
+}
+%typemap(argout) Quaternions::Quaternion& Quaternion_argout {
+  PyObject* qobj = SWIG_NewPointerObj((new Quaternions::Quaternion(*$1)),
+                                      SWIGTYPE_p_Quaternions__Quaternion, SWIG_POINTER_OWN);
+  if(!qobj) {SWIG_fail;}
+  Py_INCREF(qobj);
+  %append_output(qobj);
+}
+
 
 // typecheck supports overloading
 %typecheck(SWIG_TYPECHECK_QUATERNION_ARRAY) const std::vector<Quaternions::Quaternion>& {
@@ -120,11 +131,11 @@
     } else { // otherwise...
       PyObject* item0 = PySequence_GetItem($input, 0);
       if(PySequence_Check(item0) && PySequence_Size(item0)==4) { // Accept if it's a sequence of sequences with length 4
-	PyObject* item00 = PySequence_GetItem(item0, 0);
-	$1 = (PyFloat_Check(item00) || PyInt_Check(item00));
+        PyObject* item00 = PySequence_GetItem(item0, 0);
+        $1 = (PyFloat_Check(item00) || PyInt_Check(item00));
       } else { // Accept if it's a sequence of SWIG-wrapped Quaternions
-	void* p = 0;
-	$1 = SWIG_IsOK(SWIG_ConvertPtr(item0, &p, SWIGTYPE_p_Quaternions__Quaternion, 0 | 0 ));
+        void* p = 0;
+        $1 = SWIG_IsOK(SWIG_ConvertPtr(item0, &p, SWIGTYPE_p_Quaternions__Quaternion, 0 | 0 ));
       }
     }
   } else {
@@ -143,20 +154,20 @@
       size = PySequence_Size($input);
       tmp = std::vector<Quaternions::Quaternion>(size);
       for(i=0; i<size; ++i) {
-	itemi = PySequence_GetItem($input, i);
-	if(PySequence_Check(itemi) && PySequence_Size(itemi)==4) { // Accept if it's a sequence of sequences with length 4
-	  for(j=0; j<4; ++j) {
-	    itemij = PySequence_GetItem(itemi, j);
-	    SWIG_AsVal(double)(itemij, &(tmp[i][j]));
-	  }
-	} else { // Accept if it's a sequence of SWIG-wrapped Quaternions
-	  p = 0;
-	  res = SWIG_IsOK(SWIG_ConvertPtr(itemi, &p, SWIGTYPE_p_Quaternions__Quaternion, 0 | 0 ));
-	  if(!res) {
-	    SWIG_exception_fail(SWIG_ArgError(res), "expected argument $argnum to be a sequence of objects of type \"Quaternion\".");
-	  }
-	  tmp[i] = *((Quaternions::Quaternion*)p);
-	}
+        itemi = PySequence_GetItem($input, i);
+        if(PySequence_Check(itemi) && PySequence_Size(itemi)==4) { // Accept if it's a sequence of sequences with length 4
+          for(j=0; j<4; ++j) {
+            itemij = PySequence_GetItem(itemi, j);
+            SWIG_AsVal(double)(itemij, &(tmp[i][j]));
+          }
+        } else { // Accept if it's a sequence of SWIG-wrapped Quaternions
+          p = 0;
+          res = SWIG_IsOK(SWIG_ConvertPtr(itemi, &p, SWIGTYPE_p_Quaternions__Quaternion, 0 | 0 ));
+          if(!res) {
+            SWIG_exception_fail(SWIG_ArgError(res), "expected argument $argnum to be a sequence of objects of type \"Quaternion\".");
+          }
+          tmp[i] = *((Quaternions::Quaternion*)p);
+        }
       }
     }
   } else {
@@ -176,7 +187,7 @@
   PyObject** data = static_cast<PyObject**>(PyArray_DATA((PyArrayObject*)$result));
   for(npy_intp i=0; i<size; ++i) {
     PyObject* qobj = SWIG_NewPointerObj((new Quaternions::Quaternion((*(&$1))[i])),
-					SWIGTYPE_p_Quaternions__Quaternion, SWIG_POINTER_OWN);
+                                        SWIGTYPE_p_Quaternions__Quaternion, SWIG_POINTER_OWN);
     if(!qobj) {SWIG_fail;}
     Py_INCREF(qobj);
     data[i] = qobj;
@@ -189,23 +200,23 @@
   PyObject** data = static_cast<PyObject**>(PyArray_DATA((PyArrayObject*)$result));
   for(npy_intp i=0; i<size; ++i) {
     PyObject* qobj = SWIG_NewPointerObj((new Quaternions::Quaternion((*$1)[i])),
-					SWIGTYPE_p_Quaternions__Quaternion, SWIG_POINTER_OWN);
+                                        SWIGTYPE_p_Quaternions__Quaternion, SWIG_POINTER_OWN);
     if(!qobj) {SWIG_fail;}
     Py_INCREF(qobj);
     data[i] = qobj;
   }
 }
 
-%typemap (in,numinputs=0) std::vector<Quaternions::Quaternion>& Quaternion_argout (std::vector<Quaternions::Quaternion> vec_temp) {
+%typemap (in,numinputs=0) std::vector<Quaternions::Quaternion>& Quaternions_argout (std::vector<Quaternions::Quaternion> vec_temp) {
   $1 = &vec_temp;
 }
-%typemap(argout) std::vector<Quaternions::Quaternion>& Quaternion_argout {
+%typemap(argout) std::vector<Quaternions::Quaternion>& Quaternions_argout {
   npy_intp size = $1->size();
   PyArrayObject *npy_arr = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNew(1, &size, NPY_OBJECT));
   PyObject** data = static_cast<PyObject**>(PyArray_DATA(npy_arr));
   for(npy_intp i=0; i<size; ++i) {
     PyObject* qobj = SWIG_NewPointerObj((new Quaternions::Quaternion((*$1)[i])),
-					SWIGTYPE_p_Quaternions__Quaternion, SWIG_POINTER_OWN);
+                                        SWIGTYPE_p_Quaternions__Quaternion, SWIG_POINTER_OWN);
     if(!qobj) {SWIG_fail;}
     Py_INCREF(qobj);
     data[i] = qobj;

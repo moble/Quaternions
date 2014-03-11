@@ -138,20 +138,26 @@ Remove sign-ambiguity of rotors.
 """
 
 %feature("docstring") Quaternions::RDelta """
-Difference between frame rotors.
-================================
+Difference between frame rotors R1*R2.inverse()
+===============================================
   Parameters
   ----------
     const vector<Quaternion>& R1
       Vector of rotors
     const vector<Quaternion>& R2
       Vector of rotors
-    const unsigned int IndexOfFiducialTime = 0
-      Integer index of time at which difference is set to zero [default: 0]
+    const int IndexOfFiducialTime = -1
+      Integer index of time at which difference is set to zero [default: -1]
   
   Returns
   -------
     vector<Quaternion>
+  
+  Description
+  -----------
+    If the optional IndexOfFiducialTime is given, the returned quantity is
+    R1*Offset*R2.inverse(), where Offset is R1[I].inverse()*R2[I], thus
+    ensuring that RDelta[I]=1.
   
 """
 
@@ -205,6 +211,25 @@ Integrate scalar function by simple trapezoidal rule.
   Returns
   -------
     vector<double>
+  
+"""
+
+%feature("docstring") Quaternions::hunt """
+Find the largest index i with x[i]<=x_i.
+========================================
+  Parameters
+  ----------
+    const vector<double>& x
+    const double x_i
+    unsigned int i = 0
+  
+  Returns
+  -------
+    unsigned int
+  
+  Description
+  -----------
+    Based on the Numerical Recipes routine of the same name
   
 """
 
@@ -277,6 +302,41 @@ Minimal-rotation version of the input frame.
   Returns
   -------
     vector<Quaternion>
+  
+"""
+
+%feature("docstring") Quaternions::OptimalAlignment """
+Time and rotor offsets such that Rdelta*Rb(t+deltat) is as close to Ra(t) as possible.
+======================================================================================
+  Parameters
+  ----------
+    const double t1
+      Initial bound of alignment range
+    const double t2
+      Final bound of alignment range
+    const vector<Quaternion>& Ra
+      Vector of fixed rotors.
+    const vector<double>& ta
+      Vector of corresponding time steps.
+    const vector<Quaternion>& Rb
+      Vector of rotors to be aligned to Ra.
+    const vector<double>& tb
+      Vector of corresponding time steps.
+    double& deltat
+      Output optimal time offset
+    Quaternions::Quaternion& R_delta
+      Output optimal rotor
+  
+  Returns
+  -------
+    void
+  
+  Description
+  -----------
+    This routine actively optimizes the time offset and all three rotational
+    degrees of freedom for Rb, so that Rdelta*Rb(t+deltat) is as close to Ra(t)
+    as possible over the range (t1, t2). The error measure is just the usual
+    angle(UnflipRotors(RDelta(Ra,Rb))) integrated over (t1,t2).
   
 """
 
@@ -415,6 +475,19 @@ Find the frame with the given angular velocity function.
   
 """
 
+%feature("docstring") Quaternions::Component1 """
+
+
+  Parameters
+  ----------
+    const vector<Quaternions::Quaternion>& Q
+  
+  Returns
+  -------
+    vector<double>
+  
+"""
+
 %feature("docstring") Quaternions::exp """
 
 
@@ -440,8 +513,8 @@ Find the frame with the given angular velocity function.
 """
 
 %feature("docstring") Quaternions::QuaternionDerivative """
-Three-point finite-differencing of vector of Quaternions.
-=========================================================
+Five-point finite-differencing of vector of Quaternions.
+========================================================
   Parameters
   ----------
     const vector<Quaternion>& f
@@ -455,7 +528,16 @@ Three-point finite-differencing of vector of Quaternions.
   
   Description
   -----------
-    Sundquist and Veronis, Tellus XXII (1970), 1
+    The formula for this finite difference comes from Eq. (A 5b) of 'Derivative
+    formulas and errors for non-uniformly spaced points' by M. K. Bowen and
+    Ronald Smith. As explained in their Eqs. (B 9b) and (B 10b), this is a
+    fourth-order formula.
+    
+    If there are fewer than five points, the function reverts to simpler
+    formulas. If there are fewer than two points, or there are different
+    numbers of points in the two input vectors, an exception is thrown.
+    
+    Sundqvist and Veronis, Tellus XXII (1970), 1
   
 """
 
@@ -602,29 +684,66 @@ Input frame with prescribed rate of rotation about Z axis.
   
 """
 
-%feature("docstring") Quaternions::Component0 """
-
-
+%feature("docstring") Quaternions::ApproximateMeanRotor """
+'Mean' rotor, minimizing 'distance' between R(t) and R_mean
+===========================================================
   Parameters
   ----------
-    const vector<Quaternions::Quaternion>& Q
+    const vector<Quaternion>& R
+      Vector of rotors to be averaged.
   
   Returns
   -------
-    vector<double>
+    Quaternion
   
-"""
+  Description
+  -----------
+    The true mean of a rotor function of time can only be calculated by an
+    optimization algorithm because the metric is too complicated to solve
+    analytically. Instead, this algorithm uses a simple approximation that is
+    true in the limit of R(t) being constant. In particular, the ideal mean
+    would be calculated using the angle between R(t) and R_mean; this function
+    minimizes the squared sin of half that angle. Another way of thinking of
+    this is that this function isn't approximate; it just uses a different
+    metric, which is approximately equal to what we would like to use.
+    
+    This algorithm calculates the averaging formula found in 'Means
+and
+    averaging in the group of rotations'
+    http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.16.5040.
+  
 
-%feature("docstring") SQR """
-
-
+'Mean' rotor, approximately minimizing integrated 'distance' between R(t) and R_mean
+====================================================================================
   Parameters
   ----------
-    const double& x
+    const vector<Quaternion>& R
+      Vector of rotors to be averaged.
+    const vector<double>& t
+      Vector of corresponding time steps.
+    const double t1 = -1e300
+      Optional early bound of time to average over
+    const double t2 = 1e300
+      Optional late bound of time to average over
   
   Returns
   -------
-    double
+    Quaternion
+  
+  Description
+  -----------
+    The true mean of a rotor function of time can only be calculated by an
+    optimization algorithm because the metric is too complicated to solve
+    analytically. Instead, this algorithm uses a simple approximation that is
+    true in the limit of R(t) being constant. In particular, the ideal mean
+    would be calculated using the angle between R(t) and R_mean; this function
+    minimizes the squared sin of half that angle. Another way of thinking of
+    this is that this function isn't approximate; it just uses a different
+    metric, which is approximately equal to what we would like to use.
+    
+    This algorithm calculates the continuous limit of the averaging formula
+    found in 'Means and averaging in the group of rotations'
+    http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.16.5040.
   
 """
 
@@ -659,19 +778,20 @@ Time-derivative of 2-D quaternion logarithm for vector with given angular veloci
   
 """
 
-%feature("docstring") Quaternions::operator/ """
+%feature("docstring") Quaternions::Quaternion::operator+= """
 
 
   Parameters
   ----------
-    const vector<double>& v
-    const double a
+    const Quaternion& Q
   
   Returns
   -------
-    vector<double>
+    Quaternion&
   
+"""
 
+%feature("docstring") Quaternions::operator/ """
 
 
   Parameters
@@ -1052,18 +1172,6 @@ Construct minimal-rotation frame from Z basis vector of that frame.
 
   Parameters
   ----------
-    const vector<double>& v1
-    const vector<double>& v2
-  
-  Returns
-  -------
-    vector<double>
-  
-
-
-
-  Parameters
-  ----------
     const double a
     const Quaternion& Q
   
@@ -1179,6 +1287,18 @@ Construct minimal-rotation frame from Z basis vector of that frame.
   -------
     vector<Quaternion>
   
+
+
+
+  Parameters
+  ----------
+    const vector<double>& a
+    const double b
+  
+  Returns
+  -------
+    vector<double>
+  
 """
 
 %feature("docstring") Quaternions::normalized """
@@ -1228,7 +1348,7 @@ Time-derivative of the quaternion logarithm for frame with given angular velocit
   
 """
 
-%feature("docstring") Quaternions::Component1 """
+%feature("docstring") Quaternions::Component0 """
 
 
   Parameters
@@ -1251,6 +1371,42 @@ Time-derivative of the quaternion logarithm for frame with given angular velocit
   Returns
   -------
     bool
+  
+"""
+
+%feature("docstring") Quaternions::ApproximateOptimalAlignment """
+Time and rotor offsets such that Rdelta*Rb(t+deltat) is as close to Ra(t) as possible.
+======================================================================================
+  Parameters
+  ----------
+    const double t1
+      Early bound of time to average over
+    const double t2
+      Late bound of time to average over
+    const vector<Quaternion>& Ra
+      Vector of fixed rotors.
+    const vector<double>& ta
+      Vector of corresponding time steps.
+    const vector<Quaternion>& Rb
+      Vector of rotors to be aligned to Ra.
+    const vector<double>& tb
+      Vector of corresponding time steps.
+    double& deltat
+      Output optimal time offset
+    Quaternions::Quaternion& R_delta
+      Output optimal rotor
+  
+  Returns
+  -------
+    void
+  
+  Description
+  -----------
+    This routine actively optimizes over the time offset of Rb and
+    approximately optimizes over the rotational degrees of freedom in Rb such
+    that Rdelta*Rb(t+deltat) is as close to Ra(t) as possible. The rotational
+    optimization for any given time offset is performed analytically by the
+    routine ApproximateOptimalAlignmentRotor.
   
 """
 
@@ -1342,18 +1498,6 @@ namespace Quaternions
 """
 
 %feature("docstring") Quaternions::operator- """
-
-
-  Parameters
-  ----------
-    const vector<double>& v1
-    const vector<double>& v2
-  
-  Returns
-  -------
-    vector<double>
-  
-
 
 
   Parameters
@@ -1588,18 +1732,6 @@ class Quaternions::Quaternion
 """
 
 %feature("docstring") Quaternions::operator* """
-
-
-  Parameters
-  ----------
-    const vector<double>& v
-    const double a
-  
-  Returns
-  -------
-    vector<double>
-  
-
 
 
   Parameters
@@ -1961,18 +2093,6 @@ Quaternion multiplication.
 
   Parameters
   ----------
-    const vector<double>& v1
-    const vector<double>& v2
-  
-  Returns
-  -------
-    vector<double>
-  
-
-
-
-  Parameters
-  ----------
     const Quaternion& Q
     const Quaternion& P
   
@@ -2048,24 +2168,43 @@ Return exponent of Quaternion.
 
   Parameters
   ----------
-    const vector<double>& v1
-    const vector<double>& v2
-  
-  Returns
-  -------
-    double
-  
-
-
-
-  Parameters
-  ----------
     const Quaternion& Q
     const Quaternion& P
   
   Returns
   -------
     double
+  
+"""
+
+%feature("docstring") Quaternions::ApproximateOptimalAlignmentRotor """
+Approximate Rdelta such that Rdelta*Rb is as nearly equal to Ra as possible.
+============================================================================
+  Parameters
+  ----------
+    const vector<Quaternion>& Ra
+      Vector of fixed rotors.
+    const vector<Quaternion>& Rb
+      Vector of rotors to be aligned to Ra.
+    const vector<double>& t
+      Vector of corresponding time steps.
+    const int IndexOfFiducialTime = -1
+      Time at which RDelta ensures the rotors are equal
+    const double t1 = -1e300
+      Optional early bound of time to average over
+    const double t2 = 1e300
+      Optional late bound of time to average over
+  
+  Returns
+  -------
+    Quaternion
+  
+  Description
+  -----------
+    This routine essentially just returns the MeanRotor of the difference
+    between Ra and Rb. The result is an Rdelta which can be applied to Rb, by
+    multiplication on the left, to give a new time-series for Rb that is
+    approximately as close to Ra as possible.
   
 """
 
@@ -2127,6 +2266,29 @@ Return exponent of Quaternion.
   Returns
   -------
     Quaternion&
+  
+"""
+
+%feature("docstring") Quaternions::BoostRotor """
+Return a rotor taking the given vector into its boosted version.
+================================================================
+  Parameters
+  ----------
+    vector<double> ThreeVelocity
+      Three-vector velocity of the new frame WRT this frame
+    vector<double> ThreeVectorToBeBoosted
+      Three-vector direction to be boosted by the rotor
+  
+  Returns
+  -------
+    Quaternion
+  
+  Description
+  -----------
+    This function returns a rotor $R_b$ that takes the input vector $\\hat{w}$
+    (which will be normalized)  considered as a direction on the future null
+    sphere  into its boosted version. Note that this rotor is a function of
+    both the vector being boosted and the boost itself.
   
 """
 
