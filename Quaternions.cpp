@@ -909,16 +909,12 @@ public:
   }
 
   double EvaluateMinimizationQuantity(const double deltat, const double deltax, const double deltay, const double deltaz) const {
-    std::cerr << __FILE__ << ":" << __LINE__ << "" << std::endl;
     using namespace Quaternions; // Allow me to subtract a double from a vector<double> below
     const Quaternions::Quaternion R_delta = Quaternions::exp(Quaternions::Quaternion(0, deltax, deltay, deltaz));
     const std::vector<Quaternions::Quaternion> Rbprime = Quaternions::Squad(R_delta * Rb, tb+deltat, ta);
     const unsigned int Size=Rbprime.size();
     double f = 0.0;
-    std::cerr << __FILE__ << ":" << __LINE__ << ": R_delta="<<R_delta<< "\tRb[0]="<<Rb[0] << "\tdeltat="<<deltat << std::endl;
-    std::cerr << __FILE__ << ":" << __LINE__ << ": Ra[0]="<<Ra[0]<< "\tRbprime[0]="<<Rbprime[0] << "\tProduct="<<Ra[0] * Quaternions::inverse(Rbprime[0]) << std::endl;
     double fdot_last = 4 * Quaternions::normsquared( Quaternions::log( Ra[0] * Quaternions::inverse(Rbprime[0]) ) );
-    std::cerr << __FILE__ << ":" << __LINE__ << "\n" << std::endl;
     for(unsigned int i=1; i<Size; ++i) {
       const double fdot = 4 * Quaternions::normsquared( Quaternions::log( Ra[i] * Quaternions::inverse(Rbprime[i]) ) );
       f += (ta[i]-ta[i-1])*(fdot+fdot_last)/2.0;
@@ -945,7 +941,6 @@ double minfunc3d_NoTime (const gsl_vector* delta, void* params) {
 }
 double minfunc4d (const gsl_vector* delta, void* params) {
   RotorAligner* Aligner = (RotorAligner*) params;
-  std::cerr << __FILE__ << ":" << __LINE__ << "" << std::endl;
   return Aligner->EvaluateMinimizationQuantity(gsl_vector_get(delta,0),
                                                gsl_vector_get(delta,1),
                                                gsl_vector_get(delta,2),
@@ -1116,9 +1111,7 @@ void Quaternions::OptimalAlignment(const double t1, const double t2,
   // Run the minimization
   while(status == GSL_CONTINUE && iter < MaxIterations) {
     iter++;
-    std::cerr << __FILE__ << ":" << __LINE__ << "" << std::endl;
     status = gsl_multimin_fminimizer_iterate(s);
-    std::cerr << __FILE__ << ":" << __LINE__ << "" << std::endl;
 
     if(status==GSL_EBADFUNC) {
       std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
