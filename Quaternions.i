@@ -111,7 +111,6 @@
 /////////////////////////////////////
 //// Import the quaternion class ////
 /////////////////////////////////////
-#define USE_GSL
 %apply double& OUTPUT { double& deltat };
 %apply Quaternions::Quaternion& Quaternion_argout { Quaternions::Quaternion& R_delta };
 #ifndef SWIGPYTHON_BUILTIN
@@ -139,27 +138,23 @@
   inline void __setitem__(const unsigned int i, const double a) {
     (*$self)[i] = a;
   }
-  const char* __str__() {
+  std::string __str__() {
     std::stringstream S;
     S << std::setprecision(15) << "["
       << $self->operator[](0) << ", "
       << $self->operator[](1) << ", "
       << $self->operator[](2) << ", "
       << $self->operator[](3) << "]";
-    const std::string& tmp = S.str();
-    const char* cstr = tmp.c_str();
-    return cstr;
+    return S.str();
   }
-  const char* __repr__() {
+  std::string __repr__() {
     std::stringstream S;
     S << std::setprecision(15) << "Quaternion("
       << $self->operator[](0) << ", "
       << $self->operator[](1) << ", "
       << $self->operator[](2) << ", "
       << $self->operator[](3) << ")";
-    const std::string& tmp = S.str();
-    const char* cstr = tmp.c_str();
-    return cstr;
+    return S.str();
   }
   #ifndef SWIGPYTHON_BUILTIN
   // This allows nicer manipulations
