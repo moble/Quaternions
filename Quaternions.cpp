@@ -1024,8 +1024,8 @@ void Quaternions::ApproximateOptimalAlignment(const double t1, const double t2,
   // Also, don't search more than (t2-t1)/2. to either left or right.
   double a = std::max(t2-ta.back(), (t1-t2)/2.);
   double b = std::min(t1-ta[0], (t2-t1)/2.);
-  std::cerr << __FILE__ << ":" << __LINE__ << ": a=" << a << " b=" << b << " m=" << m << std::endl;
-  std::cerr << __FILE__ << ":" << __LINE__ << ": F(a)=" << minfunc1d(a,F.params) << " F(b)=" << minfunc1d(b,F.params) << " F(m)=" << minfunc1d(m,F.params) << std::endl;
+  // std::cerr << __FILE__ << ":" << __LINE__ << ": a=" << a << " b=" << b << " m=" << m << std::endl;
+  // std::cerr << __FILE__ << ":" << __LINE__ << ": F(a)=" << minfunc1d(a,F.params) << " F(b)=" << minfunc1d(b,F.params) << " F(m)=" << minfunc1d(m,F.params) << std::endl;
 
   // To avoid any local minima, let's just start off by minimizing
   // roughly in the dumbest possible way.  First, evaluate at a bunch
@@ -1047,8 +1047,8 @@ void Quaternions::ApproximateOptimalAlignment(const double t1, const double t2,
     }
     a = m-5*Dt;
     b = m+5*Dt;
-    std::cerr << __FILE__ << ":" << __LINE__ << ": a=" << a << " b=" << b << " m=" << m << std::endl;
-    std::cerr << __FILE__ << ":" << __LINE__ << ": F(a)=" << minfunc1d(a,F.params) << " F(b)=" << minfunc1d(b,F.params) << " F(m)=" << minfunc1d(m,F.params) << std::endl;
+    // std::cerr << __FILE__ << ":" << __LINE__ << ": a=" << a << " b=" << b << " m=" << m << std::endl;
+    // std::cerr << __FILE__ << ":" << __LINE__ << ": F(a)=" << minfunc1d(a,F.params) << " F(b)=" << minfunc1d(b,F.params) << " F(m)=" << minfunc1d(m,F.params) <<std::endl;
   }
 
   T = gsl_min_fminimizer_brent;
