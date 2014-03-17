@@ -100,16 +100,6 @@ for key, value in cfs.items() :
     if(type(cfs[key])==str) :
         cfs[key] = value.replace('-Wstrict-prototypes', '')
 
-# ## Try to determine an automatic version number for this
-# try :
-#     with open(devnull, "w") as fnull :
-#         GitRev = check_output('git rev-parse HEAD', shell=True, stderr=fnull)[:-1]
-#         CodeRevision = '"{0}"'.format(GitRev)
-#         PackageVersion = GitRev[:9]
-# except (NameError, CalledProcessError) :
-#     CodeRevision = '"PaperVersion3"'
-#     PackageVersion = '3'
-
 ## Read in the license
 try :
     with open('LICENSE', 'r') as myfile :
@@ -124,8 +114,11 @@ try:
     if(python_major==3) :
         swig_opts += ['-py3']
 except AttributeError:
-    print("Your version of python is so old.  How old is it?  So old I can't even tell how old it is.")
-    pass # This should probably be an error, because python is really old, but let's keep trying...
+    print("Your version of python is SO old.  'How old is it?'  So old I can't even tell how old it is.")
+    print("No, seriously.  You should think about upgrading your python because I don't support this version.")
+    print("You can try to make this run by removing the assertion error you're about to get, but don't")
+    print("come crying to me when print statements fail or when division gives the wrong answer.")
+    raise AssertionError("Wake up grandpa!  You were dreaming of ancient pythons again.")
 
 
 ## This does the actual work
