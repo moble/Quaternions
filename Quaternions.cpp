@@ -250,10 +250,42 @@ Quaternion Quaternions::Quaternion::log() const {
   const double b = std::sqrt(x*x + y*y + z*z);
   if(std::abs(b) <= Quaternion_Epsilon*std::abs(w)) {
     if(w<0.0) {
-      cerr << "" << __FILE__ << ":" << __LINE__ << ": Infinitely many solutions for log of a negative scalar: w=" << w << "." << endl;
+      cerr << "\n\n" << __FILE__ << ":" << __LINE__
+           << ": Error: Infinitely many solutions for log of a negative scalar (w=" << w << ")." << endl;
       throw(InfinitelyManySolutions);
     }
     Result.w = std::log(w);
+  } else {
+    const double v = std::atan2(b, w);
+    const double f = v/b;
+    Result.w = std::log(w*w+b*b)/2.0;
+    // Result.w = std::log(w/std::cos(v)); // Not nice for unit vectors [w=cos(v)=0]
+    Result.x = f*x;
+    Result.y = f*y;
+    Result.z = f*z;
+  }
+  return Result;
+}
+
+/// Return logarithm of a rotor.
+Quaternion Quaternions::Quaternion::logRotor() const {
+  /// This function is just like the standard log function, except
+  /// that a negative scalar does not raise an exception; instead, the
+  /// scalar pi is returned.
+  Quaternion Result;
+  const double b = std::sqrt(x*x + y*y + z*z);
+  if(std::abs(b) <= Quaternion_Epsilon*std::abs(w)) {
+    if(w<0.0) {
+      cerr << "\n\n" << __FILE__ << ":" << __LINE__
+           << "\nWarning: Infinitely many solutions for log of a negative scalar (w=" << w << "); "
+           << "arbitrarily returning the one in the x direction." << endl;
+      Result.x = M_PI;
+      if(std::abs(w+1)>Quaternion_Epsilon) {
+        Result.w = std::log(-w);
+      }
+    } else {
+      Result.w = std::log(w);
+    }
   } else {
     const double v = std::atan2(b, w);
     const double f = v/b;
@@ -302,7 +334,7 @@ std::vector<Quaternion> Quaternions::DifferentiateRotorByLogarithm(const std::ve
   /// accuracy advantages when the logarithm is smooth, and -- at the
   /// least -- this can serve as a good test of the correctness of the
   /// logarithm formula.
-  const vector<Quaternion> logR = Quaternions::log(RIn);
+  const vector<Quaternion> logR = Quaternions::logRotor(RIn);
   const vector<Quaternion> rdot = Quaternions::QuaternionDerivative(logR, tIn);
   vector<Quaternion> ROut(RIn.size());
   for(unsigned int i=0; i<logR.size(); ++i) {
@@ -689,14 +721,14 @@ std::vector<Quaternion> Quaternions::Squad(const std::vector<Quaternion>& RIn, c
       Qip2 = RIn[iIn+2];
     }
     Ai = Qi * Quaternions::exp((
-                                Quaternions::log(Qi.inverse()*Qip1)
-                                +(Dti/Dtim1)*Quaternions::log(Qim1.inverse()*Qi)
-                                -2*Quaternions::log(Qi.inverse()*Qip1)
+                                (Qi.inverse()*Qip1).logRotor()
+                                +(Dti/Dtim1)*(Qim1.inverse()*Qi).logRotor()
+                                -2*(Qi.inverse()*Qip1).logRotor()
                                 )*0.25);
     Bip1 = Qip1 * Quaternions::exp((
-                                    (Dti/Dtip1)*Quaternions::log(Qip1.inverse()*Qip2)
-                                    +Quaternions::log(Qi.inverse()*Qip1)
-                                    -2*Quaternions::log(Qi.inverse()*Qip1)
+                                    (Dti/Dtip1)*(Qip1.inverse()*Qip2).logRotor()
+                                    +(Qi.inverse()*Qip1).logRotor()
+                                    -2*(Qi.inverse()*Qip1).logRotor()
                                     )*-0.25);
     while(iOut<tOut.size() && tOut[iOut]<=tIn[iIn+1]) {
       const double taui = (tOut[iOut]-tIn[iIn]) / Dti;
@@ -819,7 +851,10 @@ private:
   const std::vector<double>& tb;
 public:
   RotorAligner(const std::vector<Quaternions::Quaternion>& RA)
-    : Ra(RA), ta(0), Rb(0), tb(0) { }
+    : Ra(RA), ta(0), Rb(Ra), tb(ta) { } // In this case, Rb and tb
+                                        // should never be used, so
+                                        // just fill them with things
+                                        // acceptable to the compiler
   RotorAligner(double t1, double t2,
                const std::vector<Quaternions::Quaternion>& RA, const std::vector<double>& tA,
                const std::vector<Quaternions::Quaternion>& RB, const std::vector<double>& tB)
@@ -874,9 +909,9 @@ public:
     const std::vector<Quaternion> Rb2 = R_delta * Rb1;
     const unsigned int Size=Rb2.size();
     double f = 0.0;
-    double fdot_last = 4 * Quaternions::normsquared( Quaternions::log( Ra[0] * Quaternions::inverse(Rb2[0]) ) );
+    double fdot_last = 4 * Quaternions::normsquared( ( Ra[0] * Quaternions::inverse(Rb2[0]) ).logRotor() );
     for(unsigned int i=1; i<Size; ++i) {
-      const double fdot = 4 * Quaternions::normsquared( Quaternions::log( Ra[i] * Quaternions::inverse(Rb2[i]) ) );
+      const double fdot = 4 * Quaternions::normsquared( ( Ra[i] * Quaternions::inverse(Rb2[i]) ).logRotor() );
       f += (ta[i]-ta[i-1])*(fdot+fdot_last)/2.0;
       fdot_last = fdot;
     }
@@ -888,9 +923,9 @@ public:
     const std::vector<Quaternions::Quaternion> Raprime = Ra * R_mean.inverse();
     const unsigned int Size=Raprime.size();
     double f = 0.0;
-    double fdot_last = 4 * Quaternions::normsquared( Quaternions::log( Raprime[0] ) );
+    double fdot_last = 4 * Quaternions::normsquared( Quaternions::logRotor( Raprime[0] ) );
     for(unsigned int i=1; i<Size; ++i) {
-      const double fdot = 4 * Quaternions::normsquared( Quaternions::log( Raprime[i] ) );
+      const double fdot = 4 * Quaternions::normsquared( Quaternions::logRotor( Raprime[i] ) );
       f += (ta[i]-ta[i-1])*(fdot+fdot_last)/2.0;
       fdot_last = fdot;
     }
@@ -903,7 +938,7 @@ public:
     const unsigned int Size=Raprime.size();
     double f = 0.0;
     for(unsigned int i=0; i<Size; ++i) {
-      f += 4 * Quaternions::normsquared( Quaternions::log( Raprime[i] ) );
+      f += 4 * Quaternions::normsquared( Quaternions::logRotor( Raprime[i] ) );
     }
     return f;
   }
@@ -914,9 +949,9 @@ public:
     const std::vector<Quaternions::Quaternion> Rbprime = Quaternions::Squad(R_delta * Rb, tb+deltat, ta);
     const unsigned int Size=Rbprime.size();
     double f = 0.0;
-    double fdot_last = 4 * Quaternions::normsquared( Quaternions::log( Ra[0] * Quaternions::inverse(Rbprime[0]) ) );
+    double fdot_last = 4 * Quaternions::normsquared( Quaternions::logRotor( Ra[0] * Quaternions::inverse(Rbprime[0]) ) );
     for(unsigned int i=1; i<Size; ++i) {
-      const double fdot = 4 * Quaternions::normsquared( Quaternions::log( Ra[i] * Quaternions::inverse(Rbprime[i]) ) );
+      const double fdot = 4 * Quaternions::normsquared( Quaternions::logRotor( Ra[i] * Quaternions::inverse(Rbprime[i]) ) );
       f += (ta[i]-ta[i-1])*(fdot+fdot_last)/2.0;
       fdot_last = fdot;
     }
@@ -986,11 +1021,35 @@ void Quaternions::ApproximateOptimalAlignment(const double t1, const double t2,
 
   // Set the bounds to ensure that ta[0]+deltat<t1 and
   // ta[-1]+deltat>t2, which mean t2-ta[-1] < deltat < t1-ta[0].
-  // Also, don't search more than (t2-t1) to either left or right.
-  double a = std::max(t2-ta.back(), t1-t2);
-  double b = std::min(t1-ta[0], t2-t1);
-  // std::cerr << __FILE__ << ":" << __LINE__ << ": a=" << a << " b=" << b << " m=" << m << std::endl;
-  // std::cerr << __FILE__ << ":" << __LINE__ << ": F(a)=" << minfunc1d(a,F.params) << " F(b)=" << minfunc1d(b,F.params) << " F(m)=" << minfunc1d(m,F.params) << std::endl;
+  // Also, don't search more than (t2-t1)/2. to either left or right.
+  double a = std::max(t2-ta.back(), (t1-t2)/2.);
+  double b = std::min(t1-ta[0], (t2-t1)/2.);
+  std::cerr << __FILE__ << ":" << __LINE__ << ": a=" << a << " b=" << b << " m=" << m << std::endl;
+  std::cerr << __FILE__ << ":" << __LINE__ << ": F(a)=" << minfunc1d(a,F.params) << " F(b)=" << minfunc1d(b,F.params) << " F(m)=" << minfunc1d(m,F.params) << std::endl;
+
+  // To avoid any local minima, let's just start off by minimizing
+  // roughly in the dumbest possible way.  First, evaluate at a bunch
+  // of points all across the initial range.  Then, reset (a,m,b) to
+  // be our best guess, with the best value found on the mesh, and a
+  // little range nearby.  Next, narrow that range further by simply
+  // repeating the above
+  for(unsigned int iterations=0; iterations<2; ++iterations) {
+    const unsigned int MeshSize = 1000;
+    const double Dt = (b-a)/(MeshSize-1);
+    double BestF = minfunc1d(m,F.params);
+    for(unsigned int i=0; i<MeshSize; ++i) {
+      const double t = a + i*Dt;
+      const double ThisF = minfunc1d(t,F.params);
+      if(ThisF < BestF) {
+        m = t;
+        BestF = ThisF;
+      }
+    }
+    a = m-5*Dt;
+    b = m+5*Dt;
+    std::cerr << __FILE__ << ":" << __LINE__ << ": a=" << a << " b=" << b << " m=" << m << std::endl;
+    std::cerr << __FILE__ << ":" << __LINE__ << ": F(a)=" << minfunc1d(a,F.params) << " F(b)=" << minfunc1d(b,F.params) << " F(m)=" << minfunc1d(m,F.params) << std::endl;
+  }
 
   T = gsl_min_fminimizer_brent;
   s = gsl_min_fminimizer_alloc(T);
@@ -1085,8 +1144,8 @@ void Quaternions::OptimalAlignment(const double t1, const double t2,
 
   // Set initial values
   {
-    // std::cerr << __FILE__ << ":" << __LINE__ << ": R_delta=" << R_delta << "; R_delta.log()=" << R_delta.log() << std::endl;
-    const Quaternions::Quaternion R_delta_log = R_delta.log();
+    // std::cerr << __FILE__ << ":" << __LINE__ << ": R_delta=" << R_delta << "; R_delta.logRotor()=" << R_delta.logRotor() << std::endl;
+    const Quaternions::Quaternion R_delta_log = R_delta.logRotor();
     x = gsl_vector_alloc(NDimensions);
     gsl_vector_set(x, 0, deltat);
     gsl_vector_set(x, 1, R_delta_log[1]);
@@ -1187,7 +1246,7 @@ Quaternion Quaternions::MeanRotor(const std::vector<Quaternion>& R) {
 
   // Set initial values
   {
-    const Quaternions::Quaternion R_mean_log = R_mean.log();
+    const Quaternions::Quaternion R_mean_log = R_mean.logRotor();
     x = gsl_vector_alloc(NDimensions);
     gsl_vector_set(x, 0, R_mean_log[1]);
     gsl_vector_set(x, 1, R_mean_log[2]);
@@ -1303,7 +1362,7 @@ Quaternion Quaternions::MeanRotor(const std::vector<Quaternion>& R, const std::v
 
   // Set initial values
   {
-    const Quaternions::Quaternion R_mean_log = R_mean.log();
+    const Quaternions::Quaternion R_mean_log = R_mean.logRotor();
     x = gsl_vector_alloc(NDimensions);
     gsl_vector_set(x, 0, R_mean_log[1]);
     gsl_vector_set(x, 1, R_mean_log[2]);
@@ -1741,6 +1800,13 @@ std::vector<Quaternion> Quaternions::log(const std::vector<Quaternion>& Q) {
   vector<Quaternion> R(Q.size());
   for(unsigned int i=0; i<R.size(); ++i) {
     R[i] = Q[i].log();
+  }
+  return R;
+}
+std::vector<Quaternion> Quaternions::logRotor(const std::vector<Quaternion>& Q) {
+  vector<Quaternion> R(Q.size());
+  for(unsigned int i=0; i<R.size(); ++i) {
+    R[i] = Q[i].logRotor();
   }
   return R;
 }

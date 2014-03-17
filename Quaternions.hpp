@@ -48,9 +48,10 @@ namespace Quaternions {
     inline double     dot(const Quaternion& Q) const { return x*Q.x+y*Q.y+z*Q.z; }
     inline double     abs() const { return std::sqrt(normsquared()); }
     Quaternion log() const;
+    Quaternion logRotor() const;
     Quaternion exp() const;
     inline Quaternion sqrt() const { const double Abs = abs(); return (*this/Abs+1)*std::sqrt(Abs/(2+2*w/Abs)); }
-    inline double     angle() const { return 2*log().abs(); }
+    inline double     angle() const { return 2*logRotor().abs(); }
     inline Quaternion inverse() const { return conjugate()/normsquared(); }
     inline Quaternion conjugate() const { return Quaternion(w, -x, -y, -z); }
     inline Quaternion normalized() const { return (*this)/abs(); }
@@ -70,6 +71,7 @@ namespace Quaternions {
   inline double     dot(const Quaternion& Q, const Quaternion& P) { return Q.dot(P); }
   inline double     abs(const Quaternion& Q) { return Q.abs(); }
   inline Quaternion log(const Quaternion& Q) { return Q.log(); }
+  inline Quaternion logRotor(const Quaternion& Q) { return Q.logRotor(); }
   inline Quaternion exp(const Quaternion& Q) { return Q.exp(); }
   inline Quaternion sqrt(const Quaternion& Q) { return Q.sqrt(); }
   inline double     angle(const Quaternion& Q) { return Q.angle(); }
@@ -165,6 +167,7 @@ namespace Quaternions {
   std::vector<Quaternion> pow(const std::vector<Quaternion>& Q, const std::vector<Quaternion>& P);
   std::vector<double>     abs(const std::vector<Quaternion>& Q);
   std::vector<Quaternion> log(const std::vector<Quaternion>& Q);
+  std::vector<Quaternion> logRotor(const std::vector<Quaternion>& Q);
   std::vector<Quaternion> exp(const std::vector<Quaternion>& Q);
   std::vector<Quaternion> sqrt(const std::vector<Quaternion>& Q);
   std::vector<double>     angle(const std::vector<Quaternion>& Q);
