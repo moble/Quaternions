@@ -842,7 +842,7 @@ void myGSLErrorHandler (const char * reason, const char * file, int line, int gs
 gsl_error_handler_t* defaultGSLErrorHandler = gsl_set_error_handler((gsl_error_handler_t*) &myGSLErrorHandler);
 
 #ifndef DOXYGEN
-// This is a local object used by AlignTimeAndFrame
+// This is a local object used by various alignment routines below
 class RotorAligner {
 private:
   std::vector<Quaternions::Quaternion> Ra;
@@ -1003,6 +1003,9 @@ void Quaternions::ApproximateOptimalAlignment(const double t1, const double t2,
   /// possible.  The rotational optimization for any given time offset
   /// is performed analytically by the routine
   /// `ApproximateOptimalAlignmentRotor`.
+  ///
+  /// The times `t1` and `t2` are measured relative to `ta`, and all
+  /// are left fixed; `Rb` and `tb` are shifted to achieve alignment.
 
   int status=GSL_CONTINUE;
   int iter = 0, max_iter = 100;
@@ -1116,6 +1119,9 @@ void Quaternions::OptimalAlignment(const double t1, const double t2,
   /// `Rdelta*Rb(t+deltat)` is as close to `Ra(t)` as possible over
   /// the range (t1, t2).  The error measure is just the usual
   /// `angle(UnflipRotors(RDelta(Ra,Rb)))` integrated over `(t1,t2)`.
+  ///
+  /// The times `t1` and `t2` are measured relative to `ta`, and all
+  /// are left fixed; `Rb` and `tb` are shifted to achieve alignment.
 
   // Start with initial guess from ApproximateOptimalAlignment
   ApproximateOptimalAlignment(t1, t2, Ra, ta, Rb, tb, deltat, R_delta);
