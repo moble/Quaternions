@@ -5,14 +5,17 @@
 %include <std_complex.i>
 %{
 typedef std::complex<double> std_complex_double;
+typedef unsigned int unsigned_int;
 %}
 typedef std::complex<double> std_complex_double;
+typedef unsigned int unsigned_int;
 %{
 #define SWIG_AsVal_std_complex_double SWIG_AsVal_std_complex_Sl_double_Sg_
+#define SWIG_AsVal_unsigned_int SWIG_AsVal_unsigned_SS_int
 %}
 
 %define IN_TYPEMAP_STD_VECTOR_OF_PRIMITIVES(TYPE, TYPE_UPPER, ARG_NAME, \
-					    NUMPY_TYPE, TYPE_NAME, DESCR)
+                                            NUMPY_TYPE, TYPE_NAME, DESCR)
 %typecheck(SWIG_TYPECHECK_ ## TYPE_UPPER ## _ARRAY)  \
 const std::vector<TYPE>&  ARG_NAME {
   $1 = false;
@@ -33,7 +36,7 @@ const std::vector<TYPE>&  ARG_NAME {
     PyArrayObject *xa = reinterpret_cast<PyArrayObject*>($input);
     if(PyArray_TYPE(xa) != NUMPY_TYPE) {
       SWIG_exception(SWIG_TypeError, "(1) numpy array of 'TYPE_NAME' expected."	\
-		     " Make sure that the numpy array use dtype=DESCR.");
+                     " Make sure that the numpy array use dtype=DESCR.");
     }
     const std::size_t size = PyArray_DIM(xa, 0);
     temp.resize(size);
@@ -43,7 +46,7 @@ const std::vector<TYPE>&  ARG_NAME {
     } else {
       const npy_intp strides = PyArray_STRIDE(xa, 0)/sizeof(TYPE);
       for (std::size_t i = 0; i < size; i++)
-	temp[i] = array[i*strides];
+        temp[i] = array[i*strides];
     }
   } else if(PySequence_Check($input)) {
     Py_ssize_t size = PySequence_Size($input);
@@ -54,20 +57,20 @@ const std::vector<TYPE>&  ARG_NAME {
       if(!SWIG_IsOK(SWIG_AsVal(TYPE)(item, &temp[i]))) {
         Py_DECREF(item);
         SWIG_exception(SWIG_TypeError, "expected items of sequence to be of type "\
-		       "\"TYPE\" in argument $argnum");
+                       "\"TYPE\" in argument $argnum");
       }
       Py_DECREF(item);
     }
   } else {
     SWIG_exception(SWIG_TypeError, "(2) numpy array of 'TYPE_NAME' expected. " \
-		   "Make sure that the numpy array use dtype=DESCR.");
+                   "Make sure that the numpy array use dtype=DESCR.");
   }
   $1 = &temp;
 }
 %enddef
 
 %define IN_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES(TYPE, TYPE_UPPER, ARG_NAME, \
-							  NUMPY_TYPE, TYPE_NAME, DESCR)
+                                                          NUMPY_TYPE, TYPE_NAME, DESCR)
 %typecheck(SWIG_TYPECHECK_ ## TYPE_UPPER ## _ARRAY)  \
 const std::vector<std::vector<TYPE> >&  ARG_NAME {
   $1 = false;
@@ -79,11 +82,11 @@ const std::vector<std::vector<TYPE> >&  ARG_NAME {
     } else {
       PyObject* item0 = PySequence_GetItem($input, 0);
       if(PyList_Size(item0)==0) {
-	$1 = true;
+        $1 = true;
       } else {
-	PyObject* item1 = PySequence_GetItem(item0, 0);
-	TYPE* temp=0;
-	$1 = SWIG_IsOK(SWIG_AsVal(TYPE)(item1, temp));
+        PyObject* item1 = PySequence_GetItem(item0, 0);
+        TYPE* temp=0;
+        $1 = SWIG_IsOK(SWIG_AsVal(TYPE)(item1, temp));
       }
     }
   }
@@ -93,7 +96,7 @@ const std::vector<std::vector<TYPE> >&  ARG_NAME {
     PyArrayObject *xa = reinterpret_cast<PyArrayObject*>($input);
     if(PyArray_TYPE(xa) != NUMPY_TYPE) {
       SWIG_exception(SWIG_TypeError, "(2) numpy array of 'TYPE_NAME' expected."	\
-		     " Make sure that the numpy array use dtype=DESCR.");
+                     " Make sure that the numpy array use dtype=DESCR.");
     }
     const std::size_t size0 = PyArray_DIM(xa, 0);
     const std::size_t size1 = PyArray_DIM(xa, 1);
@@ -106,7 +109,7 @@ const std::vector<std::vector<TYPE> >&  ARG_NAME {
     const npy_intp strides1 = PyArray_STRIDE(xa, 1)/sizeof(TYPE);
     for (std::size_t i = 0; i < size0; ++i) {
       for (std::size_t j = 0; j< size1; ++j) {
-	temp[i][j] = array[i*strides0+j*strides1];
+        temp[i][j] = array[i*strides0+j*strides1];
       }
     }
   } else if(PySequence_Check($input)) {
@@ -119,13 +122,13 @@ const std::vector<std::vector<TYPE> >&  ARG_NAME {
       Py_ssize_t size1 = PySequence_Size(item0);
       temp[i].resize(size1);
       for(Py_ssize_t j=0; j<size1; ++j) {
-	item1 = PySequence_GetItem(item0, j);
-	if(!SWIG_IsOK(SWIG_AsVal(TYPE)(item1, &temp[i][j]))) {
-	  Py_DECREF(item1);
-	  SWIG_exception(SWIG_TypeError, "expected items of sequence to be sequences of type " \
-			 "\"TYPE\" in argument $argnum");
-	}
-	Py_DECREF(item1);
+        item1 = PySequence_GetItem(item0, j);
+        if(!SWIG_IsOK(SWIG_AsVal(TYPE)(item1, &temp[i][j]))) {
+          Py_DECREF(item1);
+          SWIG_exception(SWIG_TypeError, "expected items of sequence to be sequences of type " \
+                         "\"TYPE\" in argument $argnum");
+        }
+        Py_DECREF(item1);
       }
     }
   } else {
@@ -137,7 +140,7 @@ const std::vector<std::vector<TYPE> >&  ARG_NAME {
 
 
 %define ARGOUT_TYPEMAP_STD_VECTOR_OF_PRIMITIVES(TYPE, TYPE_UPPER, ARG_NAME, \
-						NUMPY_TYPE)
+                                                NUMPY_TYPE)
 %typemap (in,numinputs=0) std::vector<TYPE>& ARG_NAME (std::vector<TYPE> vec_temp)
 {
   $1 = &vec_temp;
@@ -155,7 +158,7 @@ const std::vector<std::vector<TYPE> >&  ARG_NAME {
 %enddef
 
 %define ARGOUT_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES(TYPE, TYPE_UPPER, ARG_NAME, \
-						NUMPY_TYPE)
+                                                NUMPY_TYPE)
 %typemap (in,numinputs=0) std::vector<std::vector<TYPE> >& ARG_NAME (std::vector<std::vector<TYPE> > vec_temp)
 {
   $1 = &vec_temp;
@@ -179,7 +182,7 @@ const std::vector<std::vector<TYPE> >&  ARG_NAME {
   SWIGINTERNINLINE bool PyInteger_Check(PyObject* in)
   {
     return  PyInt_Check(in) || (PyArray_CheckScalar(in) &&
-				PyArray_IsScalar(in,Integer));
+                                PyArray_IsScalar(in,Integer));
   }
 }
 
@@ -229,7 +232,7 @@ const std::vector<std::vector<TYPE> >&  ARG_NAME {
 }
 
 %define PY_SEQUENCE_OF_SCALARS_TO_VECTOR_OF_PRIMITIVES(TYPE, TYPE_UPPER, \
-					      ARG_NAME, TYPE_NAME, SEQ_LENGTH)
+                                              ARG_NAME, TYPE_NAME, SEQ_LENGTH)
 %typecheck(SWIG_TYPECHECK_ ## TYPE_UPPER ## _ARRAY) std::vector<TYPE> ARG_NAME
 {
   $1 = PySequence_Check($input) ? 1 : 0;
@@ -247,7 +250,7 @@ const std::vector<std::vector<TYPE> >&  ARG_NAME {
   if (SEQ_LENGTH >= 0 && pyseq_length > SEQ_LENGTH)
   {
     SWIG_exception(SWIG_TypeError, "expected a sequence with length "	\
-		   "SEQ_LENGTH for argument $argnum");
+                   "SEQ_LENGTH for argument $argnum");
   }
   tmp_vec.reserve(pyseq_length);
   for (i = 0; i < pyseq_length; i++)
@@ -257,7 +260,7 @@ const std::vector<std::vector<TYPE> >&  ARG_NAME {
     {
       Py_DECREF(item);
       SWIG_exception(SWIG_TypeError, "expected items of sequence to be of type "\
-		     "\"TYPE_NAME\" in argument $argnum");
+                     "\"TYPE_NAME\" in argument $argnum");
     }
     tmp_vec.push_back(value);
     Py_DECREF(item);
@@ -351,7 +354,8 @@ const std::vector<std::vector<TYPE> >&  ARG_NAME {
 %enddef
 
 
-IN_TYPEMAP_STD_VECTOR_OF_PRIMITIVES(int, INT32, , NPY_INT, int, intc)
+IN_TYPEMAP_STD_VECTOR_OF_PRIMITIVES(int, INT32, , NPY_INT, int, int)
+IN_TYPEMAP_STD_VECTOR_OF_PRIMITIVES(unsigned_int, INT32, , NPY_UINT, uint, uint)
 IN_TYPEMAP_STD_VECTOR_OF_PRIMITIVES(double, DOUBLE, , NPY_DOUBLE, double, double)
 IN_TYPEMAP_STD_VECTOR_OF_PRIMITIVES(std_complex_double, COMPLEX, , NPY_CDOUBLE, complex, complex)
 
@@ -368,6 +372,7 @@ ARGOUT_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES(double, DOUBLE, ARGOUT, NP
 ARGOUT_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES(std_complex_double, COMPLEX, ARGOUT, NPY_CDOUBLE)
 
 PY_SEQUENCE_OF_SCALARS_TO_VECTOR_OF_PRIMITIVES(int, INT32, IN_PY_SEQUENCE, int, -1)
+PY_SEQUENCE_OF_SCALARS_TO_VECTOR_OF_PRIMITIVES(unsigned_int, INT32, IN_PY_SEQUENCE, unsigned_int, -1)
 PY_SEQUENCE_OF_SCALARS_TO_VECTOR_OF_PRIMITIVES(double, DOUBLE, IN_PY_SEQUENCE, double, -1)
 PY_SEQUENCE_OF_SCALARS_TO_VECTOR_OF_PRIMITIVES(std_complex_double, COMPLEX, IN_PY_SEQUENCE, std_complex_double, -1)
 

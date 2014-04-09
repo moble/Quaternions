@@ -11,9 +11,9 @@
   
 """
 
-%feature("docstring") Quaternions::Quaternion::conjugate """
-
-
+%feature("docstring") Quaternions::Quaternion::logRotor """
+Return logarithm of a rotor.
+============================
   Parameters
   ----------
     (none)
@@ -21,6 +21,12 @@
   Returns
   -------
     Quaternion
+  
+  Description
+  -----------
+    This function is just like the standard log function, except that a
+    negative scalar does not raise an exception; instead, the scalar pi is
+    returned.
   
 """
 
@@ -75,6 +81,19 @@ Remove sign-ambiguity of rotors.
 """
 
 %feature("docstring") Quaternions::Quaternion::inverse """
+
+
+  Parameters
+  ----------
+    (none)
+  
+  Returns
+  -------
+    Quaternion
+  
+"""
+
+%feature("docstring") Quaternions::Quaternion::conjugate """
 
 
   Parameters
@@ -257,6 +276,54 @@ Minimal-rotation version of the input frame.
   
 """
 
+%feature("docstring") Quaternions::MeanRotor """
+Mean rotor, minimizing integrated distance between R(t_i) and R_mean.
+=====================================================================
+  Parameters
+  ----------
+    const vector<Quaternion>& R
+      Vector of rotors to be averaged.
+  
+  Returns
+  -------
+    Quaternion
+  
+  Description
+  -----------
+    This algorithm minimizes the integrated distance between the input data's
+    R(t) and R_mean by varying R_mean and finding the minimum using the
+    Nedler-Mead simplex algorithm(2) of GSL. This is the correct generalization
+    of the similar ApproximateMeanRotor function, and is essentially described
+    in my paper http://arxiv.org/abs/1302.2919/.
+  
+
+Mean rotor, minimizing integrated distance between R(t) and R_mean.
+===================================================================
+  Parameters
+  ----------
+    const vector<Quaternion>& R
+      Vector of rotors to be averaged.
+    const vector<double>& t
+      Vector of corresponding time steps.
+    double t1 = -1e300
+      Optional early bound of time to average over
+    double t2 = 1e300
+      Optional late bound of time to average over
+  
+  Returns
+  -------
+    Quaternion
+  
+  Description
+  -----------
+    This algorithm minimizes the integrated distance between the input data's
+    R(t) and R_mean by varying R_mean and finding the minimum using the
+    Nedler-Mead simplex algorithm(2) of GSL. This is the correct generalization
+    of the similar ApproximateMeanRotor function, and is essentially described
+    in my paper http://arxiv.org/abs/1302.2919/.
+  
+"""
+
 %feature("docstring") Quaternions::log """
 
 
@@ -337,6 +404,9 @@ Time and rotor offsets such that Rdelta*Rb(t+deltat) is as close to Ra(t) as pos
     degrees of freedom for Rb, so that Rdelta*Rb(t+deltat) is as close to Ra(t)
     as possible over the range (t1, t2). The error measure is just the usual
     angle(UnflipRotors(RDelta(Ra,Rb))) integrated over (t1,t2).
+    
+    The times t1 and t2 are measured relative to ta, and all are left fixed; Rb
+    and tb are shifted to achieve alignment.
   
 """
 
@@ -421,6 +491,29 @@ Squad interpolation of Quaternion time series.
   Returns
   -------
     vector<double>
+  
+"""
+
+%feature("docstring") Quaternions::FrameFromAngularVelocity_Integrand """
+Time-derivative of the quaternion logarithm for frame with given angular velocity.
+==================================================================================
+  Parameters
+  ----------
+    const vector<double>& r
+      Quaternion logarithm corresponding to the current frame
+    const vector<double>& Omega
+      Quaternion vector giving instantaneous orbital velocity of frame
+  
+  Returns
+  -------
+    vector<double>
+  
+  Description
+  -----------
+    This function returns the time-derivative of the quaternion logarithm of
+    the frame with angular velocity Omega. This can be integrated to give the
+    quaternion logarithm of the frame, which can then be exponentiated to give
+    the frame rotor.
   
 """
 
@@ -1325,26 +1418,27 @@ Construct minimal-rotation frame from Z basis vector of that frame.
   
 """
 
-%feature("docstring") Quaternions::FrameFromAngularVelocity_Integrand """
-Time-derivative of the quaternion logarithm for frame with given angular velocity.
-==================================================================================
+%feature("docstring") Quaternions::logRotor """
+
+
   Parameters
   ----------
-    const vector<double>& r
-      Quaternion logarithm corresponding to the current frame
-    const vector<double>& Omega
-      Quaternion vector giving instantaneous orbital velocity of frame
+    const Quaternion& Q
   
   Returns
   -------
-    vector<double>
+    Quaternion
   
-  Description
-  -----------
-    This function returns the time-derivative of the quaternion logarithm of
-    the frame with angular velocity Omega. This can be integrated to give the
-    quaternion logarithm of the frame, which can then be exponentiated to give
-    the frame rotor.
+
+
+
+  Parameters
+  ----------
+    const vector<Quaternion>& Q
+  
+  Returns
+  -------
+    vector<Quaternion>
   
 """
 
@@ -1407,6 +1501,9 @@ Time and rotor offsets such that Rdelta*Rb(t+deltat) is as close to Ra(t) as pos
     that Rdelta*Rb(t+deltat) is as close to Ra(t) as possible. The rotational
     optimization for any given time offset is performed analytically by the
     routine ApproximateOptimalAlignmentRotor.
+    
+    The times t1 and t2 are measured relative to ta, and all are left fixed; Rb
+    and tb are shifted to achieve alignment.
   
 """
 
@@ -2115,6 +2212,22 @@ Return exponent of Quaternion.
   
 """
 
+%feature("docstring") myGSLErrorHandler """
+
+
+  Parameters
+  ----------
+    const char * reason
+    const char * file
+    int line
+    int gsl_errno
+  
+  Returns
+  -------
+    void
+  
+"""
+
 %feature("docstring") Quaternions::Quaternion::pow """
 
 
@@ -2188,8 +2301,6 @@ Approximate Rdelta such that Rdelta*Rb is as nearly equal to Ra as possible.
       Vector of rotors to be aligned to Ra.
     const vector<double>& t
       Vector of corresponding time steps.
-    const int IndexOfFiducialTime = -1
-      Time at which RDelta ensures the rotors are equal
     const double t1 = -1e300
       Optional early bound of time to average over
     const double t2 = 1e300
