@@ -91,6 +91,8 @@ namespace Quaternions {
   const Quaternion zHat = Quaternion(0.0, 0.0, 0.0, 1.0);
 
   // Functions for arrays of Quaternion objects
+  std::vector<Quaternion> IndefiniteIntegral(const std::vector<Quaternion>& RIn, const std::vector<double>& tIn);
+  Quaternion DefiniteIntegral(const std::vector<Quaternion>& RIn, const std::vector<double>& tIn);
   std::vector<Quaternion> DifferentiateRotorByLogarithm(const std::vector<Quaternion>& RIn, const std::vector<double>& tIn);
   std::vector<Quaternion> MinimalRotation(const std::vector<Quaternion>& R, const std::vector<double>& T, const unsigned int NIterations=5);
   std::vector<Quaternion> PrescribedRotation(const std::vector<double>& RotationRateAboutZ,

@@ -326,6 +326,52 @@ std::ostream& Quaternions::operator<<(std::ostream& out, const Quaternions::Quat
 // Array operators //
 /////////////////////
 
+/// Simple component-wise integration, returning integral at each input time
+std::vector<Quaternion> Quaternions::IndefiniteIntegral(const std::vector<Quaternion>& RIn, const std::vector<double>& tIn) {
+  ///
+  /// \param RIn Vector of Quaternions
+  /// \param tIn Vector of corresponding time steps
+  if(RIn.size() != tIn.size()) {
+    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": RIn.size()=" << RIn.size() << " != tIn.size()=" << tIn.size() << endl;
+    throw(VectorSizeMismatch);
+  }
+  if(RIn.size()==0) {
+    return RIn;
+  }
+  const unsigned int Size1=RIn.size();
+  vector<Quaternion> ROut(Size1, Quaternion());
+  // ROut[0] is already zero
+  for(unsigned int i=1; i<Size1; ++i) {
+    for(unsigned int j=0; j<4; ++j) {
+      ROut[i][j] = ROut[i-1][j] + (tIn[i]-tIn[i-1])*(RIn[i][j]+RIn[i-1][j])/2.0;
+    }
+  }
+  return ROut;
+}
+
+/// Simple component-wise integration, returning total
+Quaternion Quaternions::DefiniteIntegral(const std::vector<Quaternion>& RIn, const std::vector<double>& tIn) {
+  ///
+  /// \param RIn Vector of Quaternions
+  /// \param tIn Vector of corresponding time steps
+  if(RIn.size() != tIn.size()) {
+    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": RIn.size()=" << RIn.size() << " != tIn.size()=" << tIn.size() << endl;
+    throw(VectorSizeMismatch);
+  }
+  if(RIn.size()==0) {
+    return Quaternion();
+  }
+  const unsigned int Size1=RIn.size();
+  Quaternion ROut;
+  for(unsigned int i=1; i<Size1; ++i) {
+    for(unsigned int j=0; j<4; ++j) {
+      ROut[j] += (tIn[i]-tIn[i-1])*(RIn[i][j]+RIn[i-1][j])/2.0;
+    }
+  }
+  return ROut;
+}
+
+
 /// Calculate the derivative of a rotor by the logarithm formula.
 std::vector<Quaternion> Quaternions::DifferentiateRotorByLogarithm(const std::vector<Quaternion>& RIn, const std::vector<double>& tIn) {
   /// This is a much more complicated way of evaluating the derivative
