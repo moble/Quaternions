@@ -5,6 +5,7 @@
 
 namespace Quaternions {
   unsigned int hunt(const std::vector<double>& x, const double x_i, unsigned int i=0);
+  unsigned int huntRight(const std::vector<double>& x, const double x_i, unsigned int i=0);
 
   std::vector<double> operator+(const std::vector<double>& a, const double b);
 

@@ -61,6 +61,16 @@ unsigned int Quaternions::hunt(const std::vector<double>& x, const double x_i, u
   return i;
 }
 
+/// Find the smallest index i with x[i]>=x_i
+unsigned int Quaternions::huntRight(const std::vector<double>& x, const double x_i, unsigned int i) {
+  /// Based on the Numerical Recipes routine of the same name
+  hunt_in_place(x, x_i, i);
+  if(i<x.size() && x[i]<x_i) {
+    return i+1;
+  }
+  return i;
+}
+
 
 std::vector<double> Quaternions::operator+(const std::vector<double>& a, const double b) {
   const unsigned int size = a.size();
