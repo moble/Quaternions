@@ -11,6 +11,10 @@ void hunt_in_place(const std::vector<double>& x, const double x_i, unsigned int&
     std::cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": You can't `hunt` in an empty array!" << std::endl;
     throw(IndexOutOfBounds);
   }
+  if(x.back()<=x_i) {
+    i = x.size()-1;
+    return;
+  }
   if(xSize<3) { i=0; return; }
   i = std::min(i, xSize-1);
   unsigned int i_lower=i, i_middle, i_upper, increment=1;
@@ -49,7 +53,7 @@ void hunt_in_place(const std::vector<double>& x, const double x_i, unsigned int&
     else
       i_upper=i_middle;
   }
-  i = std::min(xSize-2,i_lower);
+  i = std::min(xSize-1,i_lower);
   return;
 }
 #endif // DOXYGEN
@@ -58,16 +62,15 @@ void hunt_in_place(const std::vector<double>& x, const double x_i, unsigned int&
 unsigned int Quaternions::hunt(const std::vector<double>& x, const double x_i, unsigned int i) {
   /// Based on the Numerical Recipes routine of the same name
   hunt_in_place(x, x_i, i);
+  // std::cerr << "hunt([" << x[0] << ", ..., " << x.back() << "], " << x_i << ") = " << i << std::endl;
   return i;
 }
 
-/// Find the smallest index i with x[i]>=x_i
+/// Find the largest index i with x[i-1]<=x_i
 unsigned int Quaternions::huntRight(const std::vector<double>& x, const double x_i, unsigned int i) {
   /// Based on the Numerical Recipes routine of the same name
   hunt_in_place(x, x_i, i);
-  if(i<x.size() && x[i]<x_i) {
-    return i+1;
-  }
+  if(i<x.size()) ++i;
   return i;
 }
 

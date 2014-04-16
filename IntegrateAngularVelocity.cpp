@@ -170,7 +170,7 @@ int FrameFromAngularVelocity_RHS_p(double t, const double ri[], double drdt[], v
 #endif // DOXYGEN
 /// Find the frame with the given angular velocity function
 void Quaternions::FrameFromAngularVelocity(std::vector<double> (* Omega)(const double t), const double t0, const double t1,
-					   std::vector<Quaternions::Quaternion>& Qs, std::vector<double>& Ts) {
+                                           std::vector<Quaternions::Quaternion>& Qs, std::vector<double>& Ts) {
   ///
   /// \param Omega Function pointer returning angular velocity
   /// \param t0 Initial time
@@ -396,7 +396,7 @@ int FrameFromAngularVelocity_2D_RHS_p(double t, const double ri[], double drdt[]
 #endif // DOXYGEN
 /// Find the frame with the given angular velocity function
 void Quaternions::FrameFromAngularVelocity_2D(std::vector<double> (* Omega)(const double t), const double t0, const double t1,
-					      std::vector<Quaternions::Quaternion>& Qs, std::vector<double>& Ts) {
+                                              std::vector<Quaternions::Quaternion>& Qs, std::vector<double>& Ts) {
   ///
   /// \param Omega Function pointer returning angular velocity
   /// \param t0 Initial time

@@ -1138,6 +1138,12 @@ void Quaternions::ApproximateOptimalAlignment(const double t1, const double t2,
     // printf ("%5d [%.7f, %.7f] %.7f %.7f\n", iter, a, b, m, b - a);
   }
 
+  if(iter==max_iter) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << "\nWarning: Minimization ended because it went through " << max_iter << " iterations."
+                << "\n         This may indicate failure.  You may want to try with a better initial guess." << std::endl;
+  }
+
   gsl_min_fminimizer_free(s);
 
   deltat = m;
@@ -1252,6 +1258,12 @@ void Quaternions::OptimalAlignment(const double t1, const double t2,
     // std::cerr << std::endl;
   }
 
+  if(iter==MaxIterations) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << "\nWarning: Minimization ended because it went through " << MaxIterations << " iterations."
+                << "\n         This may indicate failure.  You may want to try with a better initial guess." << std::endl;
+  }
+
   // Get time shift and rotation
   deltat = gsl_vector_get(s->x, 0);
   R_delta = Quaternions::exp(Quaternions::Quaternion(0.0, gsl_vector_get(s->x, 1), gsl_vector_get(s->x, 2), gsl_vector_get(s->x, 3)));
@@ -1353,6 +1365,12 @@ Quaternion Quaternions::MeanRotor(const std::vector<Quaternion>& R) {
     //   std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
     //             << ":\nsize=" << size << "\tMinSimplexSize=" << MinSimplexSize << "\tstatus=" << status << std::endl;
     // }
+  }
+
+  if(iter==MaxIterations) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << "\nWarning: Minimization ended because it went through " << MaxIterations << " iterations."
+                << "\n         This may indicate failure.  You may want to try with a better initial guess." << std::endl;
   }
 
   // Get time shift and rotation
@@ -1469,6 +1487,11 @@ Quaternion Quaternions::MeanRotor(const std::vector<Quaternion>& R, const std::v
     //   std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
     //             << ":\nsize=" << size << "\tMinSimplexSize=" << MinSimplexSize << "\tstatus=" << status << std::endl;
     // }
+  }
+
+  if(iter==MaxIterations) {
+      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+                << "\nWarning: Minimization ended because it went through " << MaxIterations << " iterations." << std::endl;
   }
 
   // Get time shift and rotation

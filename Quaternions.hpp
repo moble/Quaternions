@@ -106,6 +106,8 @@ namespace Quaternions {
   std::vector<Quaternion> RDelta(const std::vector<Quaternion>& R1, const std::vector<Quaternion>& R2, const int IndexOfFiducialTime=-1);
   std::vector<Quaternion> Squad(const std::vector<Quaternion>& RIn, const std::vector<double>& tIn, const std::vector<double>& tOut);
   std::vector<Quaternion> FrameAngularVelocity(const std::vector<Quaternion>& f, const std::vector<double>& t);
+
+  // Mean rotors
   Quaternion ApproximateMeanRotor(const std::vector<Quaternion>& R);
   Quaternion ApproximateMeanRotor(const std::vector<Quaternion>& R, const std::vector<double>& t,
                                   const double t1=-1e300, const double t2=1e300);
