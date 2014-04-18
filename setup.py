@@ -143,7 +143,6 @@ setup(name="Quaternions",
                   swig_opts=swig_opts,
                   extra_link_args=['-fPIC'],
                   extra_compile_args=['-Wno-deprecated', # Numpy compilations always seem to involve deprecated things
-                                      '-Wno-null-conversion', # SWIG loves returning NULL as an int
                                       '-ffast-math', # NB: fast-math makes it impossible to detect NANs
                                       GSLDef]
                   )
