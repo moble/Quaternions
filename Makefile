@@ -8,11 +8,11 @@
 
 # By default, just call the python build process
 all :
-	python setup.py install --user
+	$(shell python setup.py install --user)
 
 # Optionally, exclude GSL and the dependent functions
 no-GSL :
-	python setup.py install --user --no-GSL
+	$(shell python setup.py install --user --no-GSL)
 
 # If needed, we can also make object files to use in other C++ programs
 cpp : Quaternions.o Utilities.o IntegrateAngularVelocity.o

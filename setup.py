@@ -120,7 +120,6 @@ except AttributeError:
     print("come crying to me when print statements fail or when division gives the wrong answer.")
     raise AssertionError("Wake up grandpa!  You were dreaming of ancient pythons again.")
 
-
 ## This does the actual work
 setup(name="Quaternions",
       # version=PackageVersion,
