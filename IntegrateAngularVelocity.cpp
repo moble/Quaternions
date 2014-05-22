@@ -135,6 +135,7 @@ std::vector<Quaternions::Quaternion> Quaternions::FrameFromAngularVelocity(const
       r[0] = (absquatlogR-M_PI)*r[0]/absquatlogR;
       r[1] = (absquatlogR-M_PI)*r[1]/absquatlogR;
       r[2] = (absquatlogR-M_PI)*r[2]/absquatlogR;
+      gsl_odeiv2_driver_reset(d); // This should be called whenever the next use of `e` will not be a continuation of the previous step
       // cerr << "Flipping r at t=" << t << endl;
     }
   }
@@ -265,6 +266,7 @@ void Quaternions::FrameFromAngularVelocity(std::vector<double> (* Omega)(const d
       r[0] = (absquatlogR-M_PI)*r[0]/absquatlogR;
       r[1] = (absquatlogR-M_PI)*r[1]/absquatlogR;
       r[2] = (absquatlogR-M_PI)*r[2]/absquatlogR;
+      gsl_odeiv2_evolve_reset(e); // This should be called whenever the next use of `e` will not be a continuation of the previous step
       nSteps=0; // This may make the integrator take a few small steps at first
     }
   }
@@ -369,6 +371,7 @@ std::vector<Quaternions::Quaternion> Quaternions::FrameFromAngularVelocity_2D(co
     if(absquatlogR>M_PI/2.) {
       r[0] = (absquatlogR-M_PI)*r[0]/absquatlogR;
       r[1] = (absquatlogR-M_PI)*r[1]/absquatlogR;
+      gsl_odeiv2_driver_reset(d); // This should be called whenever the next use of `e` will not be a continuation of the previous step
       // std::cerr << "Flipping r at t=" << t << std::endl;
     }
   }
@@ -493,6 +496,7 @@ void Quaternions::FrameFromAngularVelocity_2D(std::vector<double> (* Omega)(cons
       r[0] = (absquatlogR-M_PI)*r[0]/absquatlogR;
       r[1] = (absquatlogR-M_PI)*r[1]/absquatlogR;
       r[2] = (absquatlogR-M_PI)*r[2]/absquatlogR;
+      gsl_odeiv2_evolve_reset(e); // This should be called whenever the next use of `e` will not be a continuation of the previous step
       nSteps=0; // This may make the integrator take a few small steps at first
     }
   }
