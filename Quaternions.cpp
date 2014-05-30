@@ -719,6 +719,12 @@ std::vector<Quaternion> Quaternions::Squad(const std::vector<Quaternion>& RIn, c
   /// designed for unit quaternions, which delivers more accurate,
   /// smooth, and physical rotations than other forms of
   /// interpolation.
+  ///
+  /// Note that input rotors are assumed to have magnitude 1.  It is
+  /// possible that things will go very badly if this is not true.
+  ///
+  /// The output rotors are "unflipped", meaning that they will be
+  /// roughly continuous.
   if(RIn.size() != tIn.size()) {
     cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": RIn.size()=" << RIn.size() << " != tIn.size()=" << tIn.size() << endl;
     throw(VectorSizeMismatch);
@@ -785,7 +791,7 @@ std::vector<Quaternion> Quaternions::Squad(const std::vector<Quaternion>& RIn, c
     }
     iIn += 1;
   }
-  return ROut;
+  return Quaternions::UnflipRotors(ROut);
 }
 
 std::vector<Quaternion> Quaternions::FrameAngularVelocity(const std::vector<Quaternion>& f, const std::vector<double>& t) {
