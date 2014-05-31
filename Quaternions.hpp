@@ -58,6 +58,8 @@ namespace Quaternions {
     inline double     normsquared() const { return (w*w+x*x+y*y+z*z); }
     inline Quaternion sqrtOfRotor() const { return (*this+1)/std::sqrt(2+2*w); }
     inline std::vector<double> vec() const { std::vector<double> v(3); v[0]=x; v[1]=y; v[2]=z; return v; }
+    inline double IntrinsicDistance(const Quaternion& that) const { return 2*((*this)*that.inverse()).logRotor().abs(); }
+    inline double ChordalDistance(const Quaternion& that) const { return ((*this) - that).abs(); }
   };
   // Helper (non-member) functions for single Quaternions follow
   inline Quaternion operator+(const double a, const Quaternion& Q) { return Q+a; }
@@ -81,6 +83,8 @@ namespace Quaternions {
   inline double     normsquared(const Quaternion& Q) { return Q.normsquared(); }
   inline Quaternion sqrtOfRotor(const Quaternion& Q) { return Q.sqrtOfRotor(); }
   inline std::vector<double> vec(const Quaternion& Q) { return Q.vec(); }
+  inline double IntrinsicDistance(const Quaternion& R_A, const Quaternion& R_B) const { return 2*(R_A*R_B.inverse()).logRotor().abs(); }
+  inline double ChordalDistance(const Quaternion& R_A, const Quaternion& R_B) const { return (R_A - R_B).abs(); }
   inline Quaternion Slerp(const double tau, const Quaternion& Qa, const Quaternion& Qb) { return ( pow((Qb/Qa), tau) * Qa ); }
   std::ostream& operator<<(std::ostream& out, const Quaternions::Quaternion& q);
 
