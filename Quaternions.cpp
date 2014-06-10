@@ -626,19 +626,24 @@ std::vector<double> Quaternions::FrameFromAngularVelocity_Integrand(const std::v
 
 /// Time-derivative of 2-D quaternion logarithm for vector with given angular velocity
 void Quaternions::FrameFromAngularVelocity_2D_Integrand(const double rfrak_x, const double rfrak_y,
-                            std::vector<double> Omega,
-                            double& rfrakDot_x, double& rfrakDot_y) {
+                                                        std::vector<double> Omega,
+                                                        double& rfrakDot_x, double& rfrakDot_y) {
   const double rfrakMag = std::sqrt(rfrak_x*rfrak_x+rfrak_y*rfrak_y);
-  if(std::abs(std::sin(rfrakMag)) < Quaternion_Epsilon) { // If the matrix is really close to singular, it's equivalent to the identity, so return
+  if(std::abs(std::sin(rfrakMag)) < Quaternion_Epsilon) { // If the transformation is really close to the identity, we can just remove the z component
+    rfrakDot_x = Omega[0]/2.0;
+    rfrakDot_y = Omega[1]/2.0;
+    return;
+  }
+  if(std::abs(std::cos(rfrakMag)) < Quaternion_Epsilon) { // If the transformation is really close to -1, we can just remove the z component
     rfrakDot_x = Omega[0]/2.0;
     rfrakDot_y = Omega[1]/2.0;
     return;
   }
   // sfrakHat = {-rfrak_y/rfrakMag, rfrak_x/rfrakMag, 0.0};
-  const double Omega_S = (Omega[0]*(-rfrak_y/rfrakMag)+Omega[1]*(rfrak_x/rfrakMag))*std::tan(rfrakMag)-Omega[2];
-  Omega[0] += -Omega_S*std::sin(2*rfrakMag)*(-rfrak_y/rfrakMag);
-  Omega[1] += -Omega_S*std::sin(2*rfrakMag)*(rfrak_x/rfrakMag);
-  Omega[2] +=  Omega_S*std::cos(2*rfrakMag);
+  const double omega_v = (Omega[0]*(-rfrak_y/rfrakMag)+Omega[1]*(rfrak_x/rfrakMag))*std::tan(rfrakMag)-Omega[2];
+  Omega[0] += -omega_v*std::sin(2*rfrakMag)*(-rfrak_y/rfrakMag);
+  Omega[1] += -omega_v*std::sin(2*rfrakMag)*(rfrak_x/rfrakMag);
+  Omega[2] +=  omega_v*std::cos(2*rfrakMag);
   const double dotTerm = (rfrak_x*Omega[0]+rfrak_y*Omega[1])/(rfrakMag*rfrakMag);
   const double cotTerm = rfrakMag/(2*tan(rfrakMag));
   rfrakDot_x = (Omega[0] - rfrak_x*dotTerm)*cotTerm + rfrak_x*dotTerm/2. - 0.5*Omega[2]*rfrak_y;
