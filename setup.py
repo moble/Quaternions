@@ -16,8 +16,9 @@ Now, 'import Quaternions' may be run from a python
 instance started in any directory on the system.
 """
 
-## Check for `--no-GSL` option
 from sys import argv
+
+## Check for `--no-GSL` option
 if '--no-GSL' in argv:
     GSL=False
     GSLDef = ''
