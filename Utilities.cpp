@@ -23,11 +23,11 @@ void hunt_in_place(const std::vector<double>& x, const double x_i, unsigned int&
     i_lower=0;
     i_upper=xSize-1;
   } else {
-    if (x_i >= x[i_lower] == ascend) {
+    if ((x_i >= x[i_lower]) == ascend) {
       for (;;) {
         i_upper = i_lower + increment;
         if (i_upper >= xSize-1) { i_upper = xSize-1; break;}
-        else if (x_i < x[i_upper] == ascend) break;
+        else if ((x_i < x[i_upper]) == ascend) break;
         else {
           i_lower = i_upper;
           increment += increment;
@@ -38,7 +38,7 @@ void hunt_in_place(const std::vector<double>& x, const double x_i, unsigned int&
       for (;;) {
         if(i_lower<=increment) { i_lower = 0; break; }
         i_lower = i_lower - increment;
-        if (x_i >= x[i_lower] == ascend) break;
+        if ((x_i >= x[i_lower]) == ascend) break;
         else {
           i_upper = i_lower;
           increment += increment;
@@ -48,7 +48,7 @@ void hunt_in_place(const std::vector<double>& x, const double x_i, unsigned int&
   }
   while (i_upper-i_lower > 1) {
     i_middle = (i_upper+i_lower) >> 1;
-    if (x_i >= x[i_middle] == ascend)
+    if ((x_i >= x[i_middle]) == ascend)
       i_lower=i_middle;
     else
       i_upper=i_middle;
