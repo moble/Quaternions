@@ -18,7 +18,7 @@ no-GSL :
 	$(shell python setup.py install --user --no-GSL)
 
 # If needed, we can also make object files to use in other C++ programs
-cpp : Quaternions.o Utilities.o IntegrateAngularVelocity.o
+cpp : Quaternions.o QuaternionUtilities.o IntegrateAngularVelocity.o
 
 
 

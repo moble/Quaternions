@@ -75,11 +75,11 @@ IncDirs += [get_include()]
 # Add directories for GSL, if needed
 if GSL :
     SourceFiles = ['Quaternions.cpp',
-                   'Utilities.cpp',
+                   'QuaternionUtilities.cpp',
                    'IntegrateAngularVelocity.cpp',
                    'Quaternions.i']
     Dependencies = ['Quaternions.hpp',
-                    'Utilities.hpp',
+                    'QuaternionUtilities.hpp',
                     'IntegrateAngularVelocity.hpp',
                     'Quaternions_typemap.i']
     Libraries = ['gsl', 'gslcblas']

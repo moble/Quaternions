@@ -102,7 +102,7 @@
   #include <iostream>
   #include <iomanip>
   #include <complex>
-  #include "Utilities.hpp"
+  #include "QuaternionUtilities.hpp"
   #include "Quaternions.hpp"
   #include "IntegrateAngularVelocity.hpp"
 %}
@@ -117,7 +117,7 @@
 #ifndef SWIGPYTHON_BUILTIN
 %ignore Quaternions::Quaternion::operator=;
 #endif
-%include "Utilities.hpp"
+%include "QuaternionUtilities.hpp"
 %include "Quaternions.hpp"
 %include "IntegrateAngularVelocity.hpp"
 #if defined(SWIGPYTHON_BUILTIN)

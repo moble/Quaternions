@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <math.h> // acosh is in math.h, but not cmath
 #include <algorithm>
-#include "Utilities.hpp"
+#include "QuaternionUtilities.hpp"
 #include "Errors.hpp"
 
 
