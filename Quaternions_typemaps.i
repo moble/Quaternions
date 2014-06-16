@@ -138,10 +138,10 @@
         $1 = SWIG_IsOK(SWIG_ConvertPtr(item0, &p, SWIGTYPE_p_Quaternions__Quaternion, 0 | 0 ));
       }
     }
-  } else {
-    // Accept if it's a SWIG-wrapped vector<Quaternion>
-    void* p = 0;
-    $1 = SWIG_IsOK(SWIG_ConvertPtr($input, &p, SWIGTYPE_p_std__vectorT_Quaternions__Quaternion_std__allocatorT_Quaternions__Quaternion_t_t, 0 | 0 ));
+  // } else {
+  //   // Accept if it's a SWIG-wrapped vector<Quaternion>
+  //   void* p = 0;
+  //   $1 = SWIG_IsOK(SWIG_ConvertPtr($input, &p, SWIGTYPE_p_std__vectorT_Quaternions__Quaternion_std__allocatorT_Quaternions__Quaternion_t_t, 0 | 0 ));
   }
 }
 // Allow input as either a Quaternion or a sequence of length 4
@@ -170,13 +170,13 @@
         }
       }
     }
-  } else {
-    // Accept if it's a SWIG-wrapped vector<Quaternion>
-    void* p = &tmp;
-    res = SWIG_IsOK(SWIG_ConvertPtr($input, &p, SWIGTYPE_p_std__vectorT_Quaternions__Quaternion_std__allocatorT_Quaternions__Quaternion_t_t, 0 | 0 ));
-    if(!res) {
-      SWIG_exception_fail(SWIG_ArgError(res), "expected argument $argnum to be of type \"vector<Quaternion>\".");
-    }
+  // } else {
+  //   // Accept if it's a SWIG-wrapped vector<Quaternion>
+  //   void* p = &tmp;
+  //   res = SWIG_IsOK(SWIG_ConvertPtr($input, &p, SWIGTYPE_p_std__vectorT_Quaternions__Quaternion_std__allocatorT_Quaternions__Quaternion_t_t, 0 | 0 ));
+  //   if(!res) {
+  //     SWIG_exception_fail(SWIG_ArgError(res), "expected argument $argnum to be of type \"vector<Quaternion>\".");
+  //   }
   }
   $1 = &tmp;
 }
@@ -232,8 +232,8 @@
 %include "vector_typemaps.i"
 namespace std {
   // %template(vectorq) vector<Quaternions::Quaternion>;
-  %template(vectord) vector<double>;
-  %template(vectorvectord) vector<vector<double> >;
+  // %template(vectord) vector<double>;
+  // %template(vectorvectord) vector<vector<double> >;
 };
 
 #endif

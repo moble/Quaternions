@@ -89,7 +89,7 @@
     if(i>-1 && i<QuaternionsNumberOfErrors) { s << "Quaternions exception: " << QuaternionsErrors[i]; }
     else  { s << "Quaternions: Unknown exception number {" << i << "}"; }
     PyErr_SetString(QuaternionsExceptions[i], s.str().c_str());
-    return NULL;
+    return 0; // NULL;
   }
 }
 
