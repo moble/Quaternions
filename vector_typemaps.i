@@ -17,7 +17,7 @@ typedef unsigned int unsigned_int;
 %define IN_TYPEMAP_STD_VECTOR_OF_PRIMITIVES(TYPE, TYPE_UPPER, ARG_NAME, \
                                             NUMPY_TYPE, TYPE_NAME, DESCR)
 %typecheck(SWIG_TYPECHECK_ ## TYPE_UPPER ## _ARRAY)  \
-std::vector<TYPE>  ARG_NAME {
+     std::vector<TYPE> ARG_NAME, std::vector<TYPE>& ARG_NAME, std::vector<TYPE>* ARG_NAME {
   $1 = false;
   if(PyArray_Check($input)) {
     $1 = (PyArray_NDIM(reinterpret_cast<const PyArrayObject*>($input))==1);
@@ -31,7 +31,10 @@ std::vector<TYPE>  ARG_NAME {
     }
   }
 }
-%typemap(in) std::vector<TYPE> ARG_NAME (std::vector<TYPE> temp) {
+%typemap(in)
+  std::vector<TYPE> ARG_NAME (std::vector<TYPE> temp),
+  std::vector<TYPE>& ARG_NAME (std::vector<TYPE> temp)
+{
   if(PyArray_Check($input)) {
     PyArrayObject *xa = reinterpret_cast<PyArrayObject*>($input);
     if(PyArray_TYPE(xa) != NUMPY_TYPE) {
@@ -127,7 +130,7 @@ const std::vector<TYPE>&  ARG_NAME {
 %define IN_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES(TYPE, TYPE_UPPER, ARG_NAME, \
                                                           NUMPY_TYPE, TYPE_NAME, DESCR)
 %typecheck(SWIG_TYPECHECK_ ## TYPE_UPPER ## _ARRAY)  \
-const std::vector<std::vector<TYPE> >&  ARG_NAME {
+const std::vector<std::vector<TYPE> >& ARG_NAME, std::vector<std::vector<TYPE> >& ARG_NAME {
   $1 = false;
   if(PyArray_Check($input)) {
     $1 = (PyArray_NDIM(reinterpret_cast<const PyArrayObject*>($input))==2);
@@ -146,7 +149,10 @@ const std::vector<std::vector<TYPE> >&  ARG_NAME {
     }
   }
 }
-%typemap(in) const std::vector<std::vector<TYPE> >& ARG_NAME (std::vector<std::vector<TYPE> > temp) {
+%typemap(in)
+  const std::vector<std::vector<TYPE> >& ARG_NAME (std::vector<std::vector<TYPE> > temp),
+  std::vector<std::vector<TYPE> >& ARG_NAME (std::vector<std::vector<TYPE> > temp)
+{
   if(PyArray_Check($input)) {
     PyArrayObject *xa = reinterpret_cast<PyArrayObject*>($input);
     if(PyArray_TYPE(xa) != NUMPY_TYPE) {
@@ -213,8 +219,9 @@ const std::vector<std::vector<TYPE> >&  ARG_NAME {
 %enddef
 
 %define ARGOUT_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES(TYPE, TYPE_UPPER, ARG_NAME, \
-                                                NUMPY_TYPE)
-%typemap (in,numinputs=0) std::vector<std::vector<TYPE> >& ARG_NAME (std::vector<std::vector<TYPE> > vec_temp)
+                                                              NUMPY_TYPE)
+%typemap (in,numinputs=0)
+  std::vector<std::vector<TYPE> >& ARG_NAME  (std::vector<std::vector<TYPE> > vec_temp)
 {
   $1 = &vec_temp;
 }
@@ -229,6 +236,7 @@ const std::vector<std::vector<TYPE> >&  ARG_NAME {
   %append_output(PyArray_Return(npy_arr));
 }
 %enddef
+
 
 
 // Some fragments used in the array typemaps below
@@ -394,7 +402,7 @@ const std::vector<std::vector<TYPE> >&  ARG_NAME {
 %define OUT_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES_CONST_REF(TYPE, NUMPY_TYPE)
 %typemap(out) std::vector<std::vector<TYPE> > const&
 {
-  // RANDOMSTRING3
+  // RANDOMSTRING4
   npy_intp adim1 = $1->size();
   npy_intp adim2 = (adim1>0 ? (*$1)[0].size() : 0);
   npy_intp adims[2] = {adim1, adim2};
@@ -422,6 +430,20 @@ IN_TYPEMAP_CONST_STD_VECTOR_REF_OF_PRIMITIVES(std_complex_double, COMPLEX, , NPY
 IN_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES(int, INT32, , NPY_INT, int, intc)
 IN_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES(double, DOUBLE, , NPY_DOUBLE, double, double)
 IN_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES(std_complex_double, COMPLEX, , NPY_CDOUBLE, complex, complex)
+
+IN_TYPEMAP_STD_VECTOR_OF_PRIMITIVES(int, INT32, INPUT, NPY_INT, int, int)
+IN_TYPEMAP_STD_VECTOR_OF_PRIMITIVES(unsigned_int, INT32, INPUT, NPY_UINT, uint, uint)
+IN_TYPEMAP_STD_VECTOR_OF_PRIMITIVES(double, DOUBLE, INPUT, NPY_DOUBLE, double, double)
+IN_TYPEMAP_STD_VECTOR_OF_PRIMITIVES(std_complex_double, COMPLEX, INPUT, NPY_CDOUBLE, complex, complex)
+
+IN_TYPEMAP_CONST_STD_VECTOR_REF_OF_PRIMITIVES(int, INT32, INPUT, NPY_INT, int, int)
+IN_TYPEMAP_CONST_STD_VECTOR_REF_OF_PRIMITIVES(unsigned_int, INT32, INPUT, NPY_UINT, uint, uint)
+IN_TYPEMAP_CONST_STD_VECTOR_REF_OF_PRIMITIVES(double, DOUBLE, INPUT, NPY_DOUBLE, double, double)
+IN_TYPEMAP_CONST_STD_VECTOR_REF_OF_PRIMITIVES(std_complex_double, COMPLEX, INPUT, NPY_CDOUBLE, complex, complex)
+
+IN_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES(int, INT32, INPUT, NPY_INT, int, intc)
+IN_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES(double, DOUBLE, INPUT, NPY_DOUBLE, double, double)
+IN_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES(std_complex_double, COMPLEX, INPUT, NPY_CDOUBLE, complex, complex)
 
 ARGOUT_TYPEMAP_STD_VECTOR_OF_PRIMITIVES(int, INT32, ARGOUT, NPY_INT)
 ARGOUT_TYPEMAP_STD_VECTOR_OF_PRIMITIVES(double, DOUBLE, ARGOUT, NPY_DOUBLE)
@@ -459,3 +481,15 @@ OUT_TYPEMAP_STD_VECTOR_OF_PRIMITIVES_CONST_REF(std_complex_double, NPY_CDOUBLE)
 OUT_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES_CONST_REF(int, NPY_INT)
 OUT_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES_CONST_REF(double, NPY_DOUBLE)
 OUT_TYPEMAP_STD_VECTOR_OF_STD_VECTOR_OF_PRIMITIVES_CONST_REF(std_complex_double, NPY_CDOUBLE)
+
+%define %inout_vector_typemaps(Type)
+ /* %typemap(in) Type *INOUT = Type *INPUT; */
+ %typemap(in) Type &INOUT = Type &INPUT;
+ /* %typemap(typecheck) Type *INOUT = Type *INPUT; */
+ %typemap(typecheck) Type &INOUT = Type &INPUT;
+ /* %typemap(argout) Type *INOUT = Type *ARGOUT; */
+ %typemap(argout) Type &INOUT = Type &ARGOUT;
+%enddef
+
+%inout_vector_typemaps(std::vector<double>)
+%inout_vector_typemaps(std::vector<std::vector<double> >)
