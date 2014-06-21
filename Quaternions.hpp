@@ -89,6 +89,7 @@ namespace Quaternions {
   std::ostream& operator<<(std::ostream& out, const Quaternions::Quaternion& q);
 
   // Standard constants we might want (with ugly syntax for SWIG)
+  const Quaternion Zero = Quaternion(0.0, 0.0, 0.0, 0.0);
   const Quaternion  One = Quaternion(1.0, 0.0, 0.0, 0.0);
   const Quaternion xHat = Quaternion(0.0, 1.0, 0.0, 0.0);
   const Quaternion yHat = Quaternion(0.0, 0.0, 1.0, 0.0);
