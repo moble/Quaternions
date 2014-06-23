@@ -45,7 +45,6 @@ namespace Quaternions {
     inline Quaternion pow(const Quaternion& Q) const { return (this->log() * Q).exp(); }
     inline Quaternion cross(const Quaternion& Q) const { return Quaternion(0, -z*Q.y+y*Q.z, z*Q.x-x*Q.z, -y*Q.x+x*Q.y); }
     inline Quaternion commutator(const Quaternion& Q) const { return Quaternion(0, -2*z*Q.y+2*y*Q.z, 2*z*Q.x-2*x*Q.z, -2*y*Q.x+2*x*Q.y); }
-
     inline double     dot(const Quaternion& Q) const { return x*Q.x+y*Q.y+z*Q.z; }
     inline double     abs() const { return std::sqrt(normsquared()); }
     Quaternion log() const;
