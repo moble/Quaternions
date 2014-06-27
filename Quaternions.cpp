@@ -11,6 +11,9 @@
 #include "QuaternionUtilities.hpp"
 #include "Errors.hpp"
 
+// These macros are useful for debugging
+#define INFOTOCERR std::cerr << __FILE__ << ":" << __LINE__ << ":" << __func__ << ": "
+#define INFOTOCOUT std::cout << __FILE__ << ":" << __LINE__ << ":" << __func__ << ": "
 
 // Note: Don't do 'using namespace Quaternions' because we don't want
 // to confuse which log, exp, etc., is being used in any instance.
@@ -41,7 +44,7 @@ std::vector<double> ScalarIntegral(const std::vector<double>& fdot, const std::v
   /// \param fdot Vector of scalars.
   /// \param t Vector of corresponding time steps.
   if(fdot.size() != t.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": fdot.size()=" << fdot.size() << " != t.size()=" << t.size() << endl;
+    INFOTOCERR << " fdot.size()=" << fdot.size() << " != t.size()=" << t.size() << endl;
     throw(VectorSizeMismatch);
   }
   const unsigned int Size=fdot.size();
@@ -181,7 +184,7 @@ Quaternions::Quaternion::Quaternion(const std::vector<double>& q) {
     y = q[2];
     z = q[3];
   } else {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": q.size()=" << q.size() << endl;
+    INFOTOCERR << " q.size()=" << q.size() << endl;
     throw(VectorSizeNotUnderstood);
   }
 }
@@ -213,7 +216,7 @@ double Quaternions::Quaternion::operator[](const unsigned int i) const {
   case 3:
     return z;
   default:
-    cerr << "\n" << __FILE__ << ":" << __LINE__ << ": i=" << i << " is not a possible quaternion index" << endl;
+    INFOTOCERR << " i=" << i << " is not a possible quaternion index" << endl;
     throw(IndexOutOfBounds);
   }
 }
@@ -231,7 +234,7 @@ double& Quaternions::Quaternion::operator[](const unsigned int i) {
   case 3:
     return z;
   default:
-    cerr << "\n" << __FILE__ << ":" << __LINE__ << ": i=" << i << " is not a possible quaternion index" << endl;
+    INFOTOCERR << " i=" << i << " is not a possible quaternion index" << endl;
     throw(IndexOutOfBounds);
   }
 }
@@ -250,8 +253,7 @@ Quaternion Quaternions::Quaternion::log() const {
   const double b = std::sqrt(x*x + y*y + z*z);
   if(std::abs(b) <= Quaternion_Epsilon*std::abs(w)) {
     if(w<0.0) {
-      cerr << "\n\n" << __FILE__ << ":" << __LINE__
-           << ": Error: Infinitely many solutions for log of a negative scalar (w=" << w << ")." << endl;
+      INFOTOCERR << " Error: Infinitely many solutions for log of a negative scalar (w=" << w << ")." << endl;
       throw(InfinitelyManySolutions);
     }
     Result.w = std::log(w);
@@ -276,7 +278,7 @@ Quaternion Quaternions::Quaternion::logRotor() const {
   const double b = std::sqrt(x*x + y*y + z*z);
   if(std::abs(b) <= Quaternion_Epsilon*std::abs(w)) {
     if(w<0.0) {
-      cerr << "\n\n" << __FILE__ << ":" << __LINE__
+      INFOTOCERR
            << "\nWarning: Infinitely many solutions for log of a negative scalar (w=" << w << "); "
            << "arbitrarily returning the one in the x direction." << endl;
       Result.x = M_PI;
@@ -332,7 +334,7 @@ std::vector<Quaternion> Quaternions::IndefiniteIntegral(const std::vector<Quater
   /// \param RIn Vector of Quaternions
   /// \param tIn Vector of corresponding time steps
   if(RIn.size() != tIn.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": RIn.size()=" << RIn.size() << " != tIn.size()=" << tIn.size() << endl;
+    INFOTOCERR << " RIn.size()=" << RIn.size() << " != tIn.size()=" << tIn.size() << endl;
     throw(VectorSizeMismatch);
   }
   if(RIn.size()==0) {
@@ -355,7 +357,7 @@ Quaternion Quaternions::DefiniteIntegral(const std::vector<Quaternion>& RIn, con
   /// \param RIn Vector of Quaternions
   /// \param tIn Vector of corresponding time steps
   if(RIn.size() != tIn.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": RIn.size()=" << RIn.size() << " != tIn.size()=" << tIn.size() << endl;
+    INFOTOCERR << " RIn.size()=" << RIn.size() << " != tIn.size()=" << tIn.size() << endl;
     throw(VectorSizeMismatch);
   }
   if(RIn.size()==0) {
@@ -409,7 +411,7 @@ std::vector<Quaternion> Quaternions::MinimalRotation(const std::vector<Quaternio
   /// axis to the same point as R, but adjusts the rotation about that
   /// new point by imposing the minimal-rotation condition.
   if(T.size() != R.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": T.size()=" << T.size() << " != R.size()=" << R.size() << endl;
+    INFOTOCERR << " T.size()=" << T.size() << " != R.size()=" << R.size() << endl;
     throw(VectorSizeMismatch);
   }
   const unsigned int Size=T.size();
@@ -447,9 +449,9 @@ std::vector<Quaternion> Quaternions::PrescribedRotation(const std::vector<double
   /// with the given rotation rate.
 
   if(T.size() != R.size() || T.size() != RotationRateAboutZ.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__
-     << ": T.size()=" << T.size() << " != R.size()=" << R.size()
-     << " != RotationRateAboutZ.size()=" << RotationRateAboutZ.size() << endl;
+    INFOTOCERR
+      << " T.size()=" << T.size() << " != R.size()=" << R.size()
+      << " != RotationRateAboutZ.size()=" << RotationRateAboutZ.size() << endl;
     throw(VectorSizeMismatch);
   }
   const unsigned int Size=T.size();
@@ -492,7 +494,7 @@ std::vector<Quaternion> Quaternions::FrameFromXY(const std::vector<Quaternion>& 
   /// the stationary frame's (x,y,z) vectors into the new frame's
   /// (X,Y,Z) vectors.
   if(X.size() != Y.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": X.size()=" << X.size() << " != Y.size()=" << Y.size() << endl;
+    INFOTOCERR << " X.size()=" << X.size() << " != Y.size()=" << Y.size() << endl;
     throw(VectorSizeMismatch);
   }
   const unsigned int Size=X.size();
@@ -524,7 +526,7 @@ std::vector<Quaternion> Quaternions::FrameFromZ(const std::vector<Quaternion>& Z
   /// minimal-rotation condition.  Note that this leaves an unfixed
   /// initial rotation about z.
   if(Z.size() != T.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": Z.size()=" << Z.size() << " != T.size()=" << T.size() << endl;
+    INFOTOCERR << " Z.size()=" << Z.size() << " != T.size()=" << T.size() << endl;
     throw(VectorSizeMismatch);
   }
   const unsigned int Size=Z.size();
@@ -554,7 +556,7 @@ std::vector<Quaternion> Quaternions::FrameFromPrescribedRotation(const std::vect
   /// frame about Z is |omega|.  Note that this leaves an unfixed
   /// initial rotation in the X--Y plane.
   if(omega.size() != T.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": omega.size()=" << omega.size() << " != T.size()=" << T.size() << endl;
+    INFOTOCERR << " omega.size()=" << omega.size() << " != T.size()=" << T.size() << endl;
     throw(VectorSizeMismatch);
   }
   const unsigned int Size=omega.size();
@@ -688,14 +690,14 @@ std::vector<Quaternion> Quaternions::RDelta(const std::vector<Quaternion>& R1, c
   /// quantity is `R1*Offset*R2.inverse()`, where `Offset` is
   /// `R1[I].inverse()*R2[I]`, thus ensuring that `RDelta[I]`=1.
   if(R1.size() != R2.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": R1.size()=" << R1.size() << " != R2.size()=" << R2.size() << endl;
+    INFOTOCERR << " R1.size()=" << R1.size() << " != R2.size()=" << R2.size() << endl;
     throw(VectorSizeMismatch);
   }
   if(R1.size()==0) {
     return vector<Quaternion>(0);
   }
   if(int(R1.size())<=IndexOfFiducialTime) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": R1.size()=" << R1.size() << " <= IndexOfFiducialTime=" << IndexOfFiducialTime << endl;
+    INFOTOCERR << " R1.size()=" << R1.size() << " <= IndexOfFiducialTime=" << IndexOfFiducialTime << endl;
     throw(IndexOutOfBounds);
   }
   const unsigned int Size=R1.size();
@@ -731,12 +733,12 @@ std::vector<Quaternion> Quaternions::Squad(const std::vector<Quaternion>& RIn, c
   /// The output rotors are "unflipped", meaning that they will be
   /// roughly continuous.
   if(RIn.size() != tIn.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": RIn.size()=" << RIn.size() << " != tIn.size()=" << tIn.size() << endl;
+    INFOTOCERR << " RIn.size()=" << RIn.size() << " != tIn.size()=" << tIn.size() << endl;
     throw(VectorSizeMismatch);
   }
   if(tOut[0]<tIn[0] || tOut.back()>tIn.back()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": (tOut[0]=" << tOut[0] << ") < (tIn[0]=" << tIn[0]
-         << ") || (tOut.back()=" << tOut.back() << ") > (tIn.back()=" << tIn.back() << ")" << endl;
+    INFOTOCERR << " (tOut[0]=" << tOut[0] << ") < (tIn[0]=" << tIn[0]
+               << ") || (tOut.back()=" << tOut.back() << ") > (tIn.back()=" << tIn.back() << ")" << endl;
     throw(CannotExtrapolateQuaternions);
   }
   vector<Quaternion> ROut(tOut.size());
@@ -749,7 +751,7 @@ std::vector<Quaternion> Quaternions::Squad(const std::vector<Quaternion>& RIn, c
       iIn += 1;
     }
     if(iIn+1==tIn.size()) {
-      cerr << "\n" << __FILE__ << ":" << __LINE__ << ": Time " << tOut[iOut] << " is beyond the end of the input data (time " << tIn.back() << ")." << endl;
+      INFOTOCERR << " Time " << tOut[iOut] << " is beyond the end of the input data (time " << tIn.back() << ")." << endl;
       throw(CannotExtrapolateQuaternions);
     }
     if(iIn==0) {
@@ -852,7 +854,7 @@ Quaternion Quaternions::ApproximateMeanRotor(const std::vector<Quaternion>& R, c
   /// formula found in "Means and averaging in the group of rotations"
   /// <http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.16.5040>.
   if(R.size() != t.size()) {
-    std::cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": R.size()=" << R.size() << " != t.size()=" << t.size() << std::endl;
+    INFOTOCERR << " R.size()=" << R.size() << " != t.size()=" << t.size() << std::endl;
     throw(VectorSizeMismatch);
   }
   Quaternion Mean(0.,0.,0.,0.);
@@ -879,9 +881,9 @@ Quaternion Quaternions::ApproximateOptimalAlignmentRotor(const std::vector<Quate
   /// give a new time-series for `Rb` that is approximately as close
   /// to `Ra` as possible.
   if(Ra.size() != t.size() || Rb.size() != t.size()) {
-    std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
-              << "\nRa.size()=" << Ra.size() << " != t.size()=" << t.size() << " or "
-              <<   "Rb.size()=" << Rb.size() << " != t.size()=" << t.size() << std::endl;
+    INFOTOCERR
+      << "\nRa.size()=" << Ra.size() << " != t.size()=" << t.size() << " or "
+      <<   "Rb.size()=" << Rb.size() << " != t.size()=" << t.size() << std::endl;
     throw(VectorSizeMismatch);
   }
   return ApproximateMeanRotor(RDelta(Ra, Rb), t, t1, t2);
@@ -920,23 +922,23 @@ public:
     // Check to make sure we have sufficient times before any offset.
     // (This is necessary but not sufficient for the method to work.)
     if(t1<ta[0]) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": Alignment time t1=" << t1
-                << " does not occur in ta (which has ta[0]=" << ta[0] << ")." << std::endl;
+      INFOTOCERR << " Alignment time t1=" << t1
+                 << " does not occur in ta (which has ta[0]=" << ta[0] << ")." << std::endl;
       throw(IndexOutOfBounds);
     }
     if(t2>ta.back()) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": Alignment time t2=" << t2
-                << " does not occur in ta (which has ta.back()=" << ta.back() << ")." << std::endl;
+      INFOTOCERR << " Alignment time t2=" << t2
+                 << " does not occur in ta (which has ta.back()=" << ta.back() << ")." << std::endl;
       throw(IndexOutOfBounds);
     }
     if(tb.size()>0) {
       if(t1<tb[0]) {
-        std::cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": Alignment time t1=" << t1
-                  << " does not occur in tb (which has tb[0]=" << tb[0] << ")." << std::endl;
+        INFOTOCERR << " Alignment time t1=" << t1
+                   << " does not occur in tb (which has tb[0]=" << tb[0] << ")." << std::endl;
         throw(IndexOutOfBounds);
       }
       if(t2>tb.back()) {
-        std::cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": Alignment time t1=" << t1
+        INFOTOCERR << " Alignment time t1=" << t1
                   << " does not occur in tb (which has tb.back()=" << tb.back() << ")." << std::endl;
         throw(IndexOutOfBounds);
       }
@@ -1116,7 +1118,7 @@ void Quaternions::ApproximateOptimalAlignment(const double t1, const double t2,
   try {
     gsl_min_fminimizer_set(s, &F, m, a, b);
   } catch(int i) {
-    std::cerr << __FILE__ << ":" << __LINE__ << ": Error code=`" << i
+    INFOTOCERR << " Error code=`" << i
               << "`.\n    That's probably `" << GSL_EINVAL << "` because of an invalid initial guess for the minimizer;"
               <<          " F(deltat=" << m << ")=" << minfunc1d(m,F.params) << " is"
               <<   "\n    a worse value than one or both of the endpoints [F(deltat=" << a << ")=" << minfunc1d(a,F.params)
@@ -1129,14 +1131,13 @@ void Quaternions::ApproximateOptimalAlignment(const double t1, const double t2,
     status = gsl_min_fminimizer_iterate(s);
 
     if(status==GSL_EBADFUNC) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
-                << ":\nThe iteration encountered a singular point where the function evaluated to Inf or NaN"
-                << "\nwhile minimizing with (" << a << "," << m << "," << b << ")." << std::endl;
+      INFOTOCERR
+        << "\nThe iteration encountered a singular point where the function evaluated to Inf or NaN"
+        << "\nwhile minimizing with (" << a << "," << m << "," << b << ")." << std::endl;
     }
 
     if(status==GSL_FAILURE) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
-                << ":\nThe algorithm could not improve the current best approximation or bounding interval." << std::endl;
+      INFOTOCERR << "\nThe algorithm could not improve the current best approximation or bounding interval." << std::endl;
     }
 
     m = gsl_min_fminimizer_x_minimum(s);
@@ -1150,9 +1151,9 @@ void Quaternions::ApproximateOptimalAlignment(const double t1, const double t2,
   }
 
   if(iter==max_iter) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
-                << "\nWarning: Minimization ended because it went through " << max_iter << " iterations."
-                << "\n         This may indicate failure.  You may want to try with a better initial guess." << std::endl;
+    INFOTOCERR
+      << "\nWarning: Minimization ended because it went through " << max_iter << " iterations."
+      << "\n         This may indicate failure.  You may want to try with a better initial guess." << std::endl;
   }
 
   gsl_min_fminimizer_free(s);
@@ -1242,19 +1243,19 @@ void Quaternions::OptimalAlignment(const double t1, const double t2,
     status = gsl_multimin_fminimizer_iterate(s);
 
     if(status==GSL_EBADFUNC) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+      INFOTOCERR
                 << ":\nThe iteration encountered a singular point where the function evaluated to Inf or NaN"
                 << "\nwhile minimizing at (" << gsl_vector_get(s->x, 0) << ", " << gsl_vector_get(s->x, 1)
                 << ", " << gsl_vector_get(s->x, 2) << ", " << gsl_vector_get(s->x, 3) << ")." << std::endl;
     }
 
     if(status==GSL_FAILURE) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+      INFOTOCERR
                 << ":\nThe algorithm could not improve the current best approximation or bounding interval." << std::endl;
     }
 
     if(status==GSL_ENOPROG) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+      INFOTOCERR
                 << ":\nThe minimizer is unable to improve on its current estimate, either due to"
                 << "\nnumerical difficulty or because a genuine local minimum has been reached." << std::endl;
     }
@@ -1270,7 +1271,7 @@ void Quaternions::OptimalAlignment(const double t1, const double t2,
   }
 
   if(iter==MaxIterations) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+      INFOTOCERR
                 << "\nWarning: Minimization ended because it went through " << MaxIterations << " iterations."
                 << "\n         This may indicate failure.  You may want to try with a better initial guess." << std::endl;
   }
@@ -1353,19 +1354,19 @@ Quaternion Quaternions::MeanRotor(const std::vector<Quaternion>& R) {
     // std::cerr << std::endl;
 
     if(status==GSL_EBADFUNC) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+      INFOTOCERR
                 << ":\nThe iteration encountered a singular point where the function evaluated to Inf or NaN"
                 << "\nwhile minimizing at (" << gsl_vector_get(s->x, 0) << ", " << gsl_vector_get(s->x, 1)
                 << ", " << gsl_vector_get(s->x, 2) << ")." << std::endl;
     } else if(status==GSL_FAILURE) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+      INFOTOCERR
                 << ":\nThe algorithm could not improve the current best approximation or bounding interval." << std::endl;
     } else if(status==GSL_ENOPROG) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+      INFOTOCERR
                 << ":\nThe minimizer is unable to improve on its current estimate, either due to"
                 << "\nnumerical difficulty or because a genuine local minimum has been reached." << std::endl;
     } else if(status) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+      INFOTOCERR
                 << ":\nUnkown minimization status=" << status << std::endl;
       break;
     }
@@ -1373,13 +1374,13 @@ Quaternion Quaternions::MeanRotor(const std::vector<Quaternion>& R) {
     size = gsl_multimin_fminimizer_size(s);
     status = gsl_multimin_test_size(size, MinSimplexSize);
     // if(status!=GSL_CONTINUE) {
-    //   std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+    //   INFOTOCERR
     //             << ":\nsize=" << size << "\tMinSimplexSize=" << MinSimplexSize << "\tstatus=" << status << std::endl;
     // }
   }
 
   if(iter==MaxIterations) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+      INFOTOCERR
                 << "\nWarning: Minimization ended because it went through " << MaxIterations << " iterations."
                 << "\n         This may indicate failure.  You may want to try with a better initial guess." << std::endl;
   }
@@ -1475,19 +1476,19 @@ Quaternion Quaternions::MeanRotor(const std::vector<Quaternion>& R, const std::v
     // std::cerr << std::endl;
 
     if(status==GSL_EBADFUNC) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+      INFOTOCERR
                 << ":\nThe iteration encountered a singular point where the function evaluated to Inf or NaN"
                 << "\nwhile minimizing at (" << gsl_vector_get(s->x, 0) << ", " << gsl_vector_get(s->x, 1)
                 << ", " << gsl_vector_get(s->x, 2) << ")." << std::endl;
     } else if(status==GSL_FAILURE) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+      INFOTOCERR
                 << ":\nThe algorithm could not improve the current best approximation or bounding interval." << std::endl;
     } else if(status==GSL_ENOPROG) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+      INFOTOCERR
                 << ":\nThe minimizer is unable to improve on its current estimate, either due to"
                 << "\nnumerical difficulty or because a genuine local minimum has been reached." << std::endl;
     } else if(status) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+      INFOTOCERR
                 << ":\nUnkown minimization status=" << status << std::endl;
       break;
     }
@@ -1495,13 +1496,13 @@ Quaternion Quaternions::MeanRotor(const std::vector<Quaternion>& R, const std::v
     size = gsl_multimin_fminimizer_size(s);
     status = gsl_multimin_test_size(size, MinSimplexSize);
     // if(status!=GSL_CONTINUE) {
-    //   std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+    //   INFOTOCERR
     //             << ":\nsize=" << size << "\tMinSimplexSize=" << MinSimplexSize << "\tstatus=" << status << std::endl;
     // }
   }
 
   if(iter==MaxIterations) {
-      std::cerr << "\n\n" << __FILE__ << ":" << __LINE__
+      INFOTOCERR
                 << "\nWarning: Minimization ended because it went through " << MaxIterations << " iterations." << std::endl;
   }
 
@@ -1577,7 +1578,7 @@ std::vector<Quaternion> Quaternions::operator/(const std::vector<double>& a, con
 }
 std::vector<Quaternion> Quaternions::operator+(const std::vector<double>& a, const std::vector<Quaternion>& Q) {
   if(a.size() != Q.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
+    INFOTOCERR << " a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
     throw(VectorSizeMismatch);
   }
   vector<Quaternion> R(Q.size());
@@ -1588,7 +1589,7 @@ std::vector<Quaternion> Quaternions::operator+(const std::vector<double>& a, con
 }
 std::vector<Quaternion> Quaternions::operator-(const std::vector<double>& a, const std::vector<Quaternion>& Q) {
   if(a.size() != Q.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
+    INFOTOCERR << " a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
     throw(VectorSizeMismatch);
   }
   vector<Quaternion> R(Q.size());
@@ -1599,7 +1600,7 @@ std::vector<Quaternion> Quaternions::operator-(const std::vector<double>& a, con
 }
 std::vector<Quaternion> Quaternions::operator*(const std::vector<double>& a, const std::vector<Quaternion>& Q) {
   if(a.size() != Q.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
+    INFOTOCERR << " a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
     throw(VectorSizeMismatch);
   }
   vector<Quaternion> R(Q.size());
@@ -1610,7 +1611,7 @@ std::vector<Quaternion> Quaternions::operator*(const std::vector<double>& a, con
 }
 std::vector<Quaternion> Quaternions::operator/(const std::vector<double>& a, const std::vector<Quaternion>& Q) {
   if(a.size() != Q.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
+    INFOTOCERR << " a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
     throw(VectorSizeMismatch);
   }
   vector<Quaternion> R(Q.size());
@@ -1733,7 +1734,7 @@ std::vector<Quaternion> Quaternions::operator/(const Quaternion& Q, const std::v
 }
 std::vector<Quaternion> Quaternions::operator+(const std::vector<Quaternion>& Q, const std::vector<double>& a) {
   if(a.size() != Q.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
+    INFOTOCERR << " a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
     throw(VectorSizeMismatch);
   }
   vector<Quaternion> R(Q.size());
@@ -1744,7 +1745,7 @@ std::vector<Quaternion> Quaternions::operator+(const std::vector<Quaternion>& Q,
 }
 std::vector<Quaternion> Quaternions::operator-(const std::vector<Quaternion>& Q, const std::vector<double>& a) {
   if(a.size() != Q.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
+    INFOTOCERR << " a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
     throw(VectorSizeMismatch);
   }
   vector<Quaternion> R(Q.size());
@@ -1755,7 +1756,7 @@ std::vector<Quaternion> Quaternions::operator-(const std::vector<Quaternion>& Q,
 }
 std::vector<Quaternion> Quaternions::operator*(const std::vector<Quaternion>& Q, const std::vector<double>& a) {
   if(a.size() != Q.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
+    INFOTOCERR << " a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
     throw(VectorSizeMismatch);
   }
   vector<Quaternion> R(Q.size());
@@ -1766,7 +1767,7 @@ std::vector<Quaternion> Quaternions::operator*(const std::vector<Quaternion>& Q,
 }
 std::vector<Quaternion> Quaternions::operator/(const std::vector<Quaternion>& Q, const std::vector<double>& a) {
   if(a.size() != Q.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
+    INFOTOCERR << " a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
     throw(VectorSizeMismatch);
   }
   vector<Quaternion> R(Q.size());
@@ -1777,7 +1778,7 @@ std::vector<Quaternion> Quaternions::operator/(const std::vector<Quaternion>& Q,
 }
 std::vector<Quaternion> Quaternions::operator+(const std::vector<Quaternion>& Q, const std::vector<Quaternion>& a) {
   if(a.size() != Q.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
+    INFOTOCERR << " a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
     throw(VectorSizeMismatch);
   }
   vector<Quaternion> R(Q.size());
@@ -1788,7 +1789,7 @@ std::vector<Quaternion> Quaternions::operator+(const std::vector<Quaternion>& Q,
 }
 std::vector<Quaternion> Quaternions::operator-(const std::vector<Quaternion>& Q, const std::vector<Quaternion>& a) {
   if(a.size() != Q.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
+    INFOTOCERR << " a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
     throw(VectorSizeMismatch);
   }
   vector<Quaternion> R(Q.size());
@@ -1799,7 +1800,7 @@ std::vector<Quaternion> Quaternions::operator-(const std::vector<Quaternion>& Q,
 }
 std::vector<Quaternion> Quaternions::operator*(const std::vector<Quaternion>& Q, const std::vector<Quaternion>& a) {
   if(a.size() != Q.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
+    INFOTOCERR << " a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
     throw(VectorSizeMismatch);
   }
   vector<Quaternion> R(Q.size());
@@ -1810,7 +1811,7 @@ std::vector<Quaternion> Quaternions::operator*(const std::vector<Quaternion>& Q,
 }
 std::vector<Quaternion> Quaternions::operator/(const std::vector<Quaternion>& Q, const std::vector<Quaternion>& a) {
   if(a.size() != Q.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
+    INFOTOCERR << " a.size()=" << a.size() << " != Q.size()=" << Q.size() << endl;
     throw(VectorSizeMismatch);
   }
   vector<Quaternion> R(Q.size());
@@ -1855,7 +1856,7 @@ std::vector<Quaternion> Quaternions::pow(const Quaternion& Q, const std::vector<
 }
 std::vector<Quaternion> Quaternions::pow(const std::vector<Quaternion>& Q, const std::vector<double>& t) {
   if(t.size() != Q.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": t.size()=" << t.size() << " != Q.size()=" << Q.size() << endl;
+    INFOTOCERR << " t.size()=" << t.size() << " != Q.size()=" << Q.size() << endl;
     throw(VectorSizeMismatch);
   }
   vector<Quaternion> R(Q.size());
@@ -1866,7 +1867,7 @@ std::vector<Quaternion> Quaternions::pow(const std::vector<Quaternion>& Q, const
 }
 std::vector<Quaternion> Quaternions::pow(const std::vector<Quaternion>& Q, const std::vector<Quaternion>& P) {
   if(P.size() != Q.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": P.size()=" << P.size() << " != Q.size()=" << Q.size() << endl;
+    INFOTOCERR << " P.size()=" << P.size() << " != Q.size()=" << Q.size() << endl;
     throw(VectorSizeMismatch);
   }
   vector<Quaternion> R(Q.size());
@@ -2073,7 +2074,7 @@ Quaternions::Quaternion Quaternions::BoostRotor(std::vector<double> ThreeVelocit
                              +ThreeVectorToBeBoosted[1]*ThreeVectorToBeBoosted[1]
                              +ThreeVectorToBeBoosted[2]*ThreeVectorToBeBoosted[2]);
   if(absThreeVectorToBeBoosted==0.) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": |ThreeVectorToBeBoosted|=" << absThreeVectorToBeBoosted << " is too small." << endl;
+    INFOTOCERR << " |ThreeVectorToBeBoosted|=" << absThreeVectorToBeBoosted << " is too small." << endl;
     throw(ValueError);
   }
   ThreeVectorToBeBoosted[0] = ThreeVectorToBeBoosted[0]/absThreeVectorToBeBoosted;
@@ -2122,10 +2123,10 @@ std::vector<Quaternion> Quaternions::QuaternionDerivative(const std::vector<Quat
   /// exception is thrown.
 
   if(f.size() != t.size()) {
-    cerr << "\n\n" << __FILE__ << ":" << __LINE__ << ": f.size()=" << f.size() << " != t.size()=" << t.size() << endl;
+    INFOTOCERR << " f.size()=" << f.size() << " != t.size()=" << t.size() << endl;
     throw(VectorSizeMismatch);
   }
-  if(f.size()<2) { cerr << "\n" << __FILE__ << ":" << __LINE__ << ": size=" << f.size() << endl; throw(NotEnoughPointsForDerivative); }
+  if(f.size()<2) { INFOTOCERR << " size=" << f.size() << endl; throw(NotEnoughPointsForDerivative); }
 
   vector<Quaternion> D(f.size());
   const unsigned int i_f = f.size()-1;
