@@ -56,7 +56,7 @@ namespace Quaternions {
     inline Quaternion conjugate() const { return Quaternion(w, -x, -y, -z); }
     inline Quaternion normalized() const { return (*this)/abs(); }
     inline double     normsquared() const { return (w*w+x*x+y*y+z*z); }
-    inline Quaternion sqrtOfRotor() const { return (*this+1)/std::sqrt(2+2*w); }
+    inline Quaternion sqrtOfRotor() const { if(std::abs(1.0+w)<Quaternion_Epsilon) return Quaternion(0.0, 1.0, 0.0, 0.0); return (*this+1)/std::sqrt(2+2*w); }
     inline std::vector<double> vec() const { std::vector<double> v(3); v[0]=x; v[1]=y; v[2]=z; return v; }
     inline double IntrinsicDistance(const Quaternion& that) const { return 2*((*this)*that.inverse()).logRotor().abs(); }
     inline double ChordalDistance(const Quaternion& that) const { return ((*this) - that).abs(); }
