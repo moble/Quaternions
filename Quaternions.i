@@ -86,10 +86,13 @@
     $action;
   } catch(int i) {
     std::stringstream s;
-    if(i>-1 && i<QuaternionsNumberOfErrors) { s << "Quaternions exception: " << QuaternionsErrors[i]; }
-    else  { s << "Quaternions: Unknown exception number {" << i << "}"; }
+    if(i>-1 && i<QuaternionsNumberOfErrors) { s << "$fulldecl: " << QuaternionsErrors[i]; }
+    else  { s << "$fulldecl: Unknown exception number {" << i << "}"; }
     PyErr_SetString(QuaternionsExceptions[i], s.str().c_str());
-    return 0; // NULL;
+    return 0;
+  } catch(...) {
+    PyErr_SetString(PyExc_RuntimeError, "$fulldecl: Unknown exception; default handler");
+    return 0;
   }
 }
 
