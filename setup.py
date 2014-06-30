@@ -144,6 +144,7 @@ setup(name="Quaternions",
                   extra_link_args=['-fPIC'],
                   extra_compile_args=['-Wno-deprecated', # Numpy compilations always seem to involve deprecated things
                                       '-ffast-math', # NB: fast-math makes it impossible to detect NANs
+                                      '-O3', # Because some python builds use '-O1' or less!
                                       GSLDef]
                   )
         ],
