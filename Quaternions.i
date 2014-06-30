@@ -24,6 +24,49 @@
 
 // The following will appear in the header of the `_wrap.cpp` file.
 %{
+  // The following allows us to elegantly fail in python from manual
+  // interrupts and floating-point exceptions found in the c++ code.
+  // The setjmp part of this was inspired by the post
+  // <http://stackoverflow.com/a/12155582/1194883>.  The code for
+  // setting the csr flags is taken from SpEC.
+  #include <csetjmp>
+  #include <csignal>
+  #ifdef __APPLE__
+    #include <xmmintrin.h>
+  #else
+    #include <fenv.h>     // For feenableexcept. Doesn't seem to be a <cfenv>
+    #ifndef __USE_GNU
+      extern "C" int feenableexcept (int EXCEPTS);
+    #endif
+  #endif
+  static sigjmp_buf Quaternions_FloatingPointExceptionJumpBuffer;
+  static sigjmp_buf Quaternions_InterruptExceptionJumpBuffer;
+  void Quaternions_FloatingPointExceptionHandler(int sig) {
+    siglongjmp(Quaternions_FloatingPointExceptionJumpBuffer, sig);
+  }
+  void Quaternions_InterruptExceptionHandler(int sig) {
+    siglongjmp(Quaternions_InterruptExceptionJumpBuffer, sig);
+  }
+  namespace Quaternions {
+    // This function enables termination on FPE's
+    bool _RaiseFloatingPointException() {
+      signal(SIGFPE, Quaternions_FloatingPointExceptionHandler);
+      signal(SIGINT, Quaternions_InterruptExceptionHandler);
+      #ifdef __APPLE__
+      _mm_setcsr( _MM_MASK_MASK &~
+                  (_MM_MASK_OVERFLOW|_MM_MASK_INVALID|_MM_MASK_DIV_ZERO));
+      #else
+      feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW);
+      #endif
+      return true;
+    }
+    // Ensure RaiseFloatingPointException() is not optimized away by
+    // using its output to define a global variable.
+    bool RaiseFPE = _RaiseFloatingPointException();
+  }
+
+  // The following allows us to elegantly fail in python from
+  // exceptions raised by the c++ code.
   const char* const QuaternionsErrors[] = {
     "This function is not yet implemented.",
     "Unknown exception",// "Failed system call.",
@@ -82,14 +125,29 @@
 // It's a good idea to try to keep this part brief, just to cut down
 // the size of the wrapper file.
 %exception {
-  try {
-    $action;
-  } catch(int i) {
-    std::stringstream s;
-    if(i>-1 && i<QuaternionsNumberOfErrors) { s << "Quaternions exception: " << QuaternionsErrors[i]; }
-    else  { s << "Quaternions: Unknown exception number {" << i << "}"; }
-    PyErr_SetString(QuaternionsExceptions[i], s.str().c_str());
-    return 0; // NULL;
+  if (!sigsetjmp(Quaternions_FloatingPointExceptionJumpBuffer, 1)) {
+    if(!sigsetjmp(Quaternions_InterruptExceptionJumpBuffer, 1)) {
+      try {
+        $action;
+      } catch(int i) {
+        std::stringstream s;
+        if(i>-1 && i<QuaternionsNumberOfErrors) { s << "Quaternions:: $fulldecl: Exception: " << QuaternionsErrors[i]; }
+        else  { s << "Quaternions:: $fulldecl: Unknown exception number {" << i << "}"; }
+        PyErr_SetString(QuaternionsExceptions[i], s.str().c_str());
+        return 0; // NULL;
+      } catch(...) {
+        std::stringstream s;
+        s << "Quaternions:: $fulldecl: Unknown exception; default handler";
+        PyErr_SetString(PyExc_RuntimeError, s.str().c_str());
+        return 0;
+      }
+    } else {
+      PyErr_SetString(PyExc_RuntimeError, "Quaternions:: $fulldecl: Caught a manual interrupt from the c++ code.");
+      return 0;
+    }
+  } else {
+    PyErr_SetString(PyExc_RuntimeError, "Quaternions:: $fulldecl: Caught a floating-point exception from the c++ code.");
+    return 0;
   }
 }
 
