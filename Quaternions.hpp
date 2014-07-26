@@ -87,10 +87,10 @@ namespace Quaternions {
   inline double     normsquared(const Quaternion& Q) { return Q.normsquared(); }
   inline Quaternion sqrtOfRotor(const Quaternion& Q) { return Q.sqrtOfRotor(); }
   inline std::vector<double> vec(const Quaternion& Q) { return Q.vec(); }
-  inline Quaternion XParityConjugateSpinor(const Quaternion& Q) { return Q.XParityConjugate(); }
-  inline Quaternion YParityConjugateSpinor(const Quaternion& Q) { return Q.YParityConjugate(); }
-  inline Quaternion ZParityConjugateSpinor(const Quaternion& Q) { return Q.ZParityConjugate(); }
-  inline Quaternion  ParityConjugateSpinor(const Quaternion& Q) { return Q.ParityConjugate(); }
+  inline Quaternion XParityConjugateSpinor(const Quaternion& Q) { return Q.XParityConjugateSpinor(); }
+  inline Quaternion YParityConjugateSpinor(const Quaternion& Q) { return Q.YParityConjugateSpinor(); }
+  inline Quaternion ZParityConjugateSpinor(const Quaternion& Q) { return Q.ZParityConjugateSpinor(); }
+  inline Quaternion  ParityConjugateSpinor(const Quaternion& Q) { return Q.ParityConjugateSpinor(); }
   inline double IntrinsicDistance(const Quaternion& R_A, const Quaternion& R_B) { return 2*(R_A*R_B.inverse()).logRotor().abs(); }
   inline double ChordalDistance(const Quaternion& R_A, const Quaternion& R_B) { return (R_A - R_B).abs(); }
   inline Quaternion Slerp(const double tau, const Quaternion& Qa, const Quaternion& Qb) { return ( pow((Qb/Qa), tau) * Qa ); }
