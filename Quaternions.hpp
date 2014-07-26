@@ -58,6 +58,10 @@ namespace Quaternions {
     inline double     normsquared() const { return (w*w+x*x+y*y+z*z); }
     inline Quaternion sqrtOfRotor() const { if(std::abs(1.0+w)<Quaternion_Epsilon) return Quaternion(0.0, 1.0, 0.0, 0.0); return (*this+1)/std::sqrt(2+2*w); }
     inline std::vector<double> vec() const { std::vector<double> v(3); v[0]=x; v[1]=y; v[2]=z; return v; }
+    inline Quaternion XParityConjugateSpinor() const { return Quaternion(w, x, -y, -z); }
+    inline Quaternion YParityConjugateSpinor() const { return Quaternion(w, -x, y, -z); }
+    inline Quaternion ZParityConjugateSpinor() const { return Quaternion(w, -x, -y, z); }
+    inline Quaternion  ParityConjugateSpinor() const { return Quaternion(w, x, y, z); }
     inline double IntrinsicDistance(const Quaternion& that) const { return 2*((*this)*that.inverse()).logRotor().abs(); }
     inline double ChordalDistance(const Quaternion& that) const { return ((*this) - that).abs(); }
   };
@@ -83,6 +87,10 @@ namespace Quaternions {
   inline double     normsquared(const Quaternion& Q) { return Q.normsquared(); }
   inline Quaternion sqrtOfRotor(const Quaternion& Q) { return Q.sqrtOfRotor(); }
   inline std::vector<double> vec(const Quaternion& Q) { return Q.vec(); }
+  inline Quaternion XParityConjugateSpinor(const Quaternion& Q) { return Q.XParityConjugate(); }
+  inline Quaternion YParityConjugateSpinor(const Quaternion& Q) { return Q.YParityConjugate(); }
+  inline Quaternion ZParityConjugateSpinor(const Quaternion& Q) { return Q.ZParityConjugate(); }
+  inline Quaternion  ParityConjugateSpinor(const Quaternion& Q) { return Q.ParityConjugate(); }
   inline double IntrinsicDistance(const Quaternion& R_A, const Quaternion& R_B) { return 2*(R_A*R_B.inverse()).logRotor().abs(); }
   inline double ChordalDistance(const Quaternion& R_A, const Quaternion& R_B) { return (R_A - R_B).abs(); }
   inline Quaternion Slerp(const double tau, const Quaternion& Qa, const Quaternion& Qb) { return ( pow((Qb/Qa), tau) * Qa ); }
