@@ -178,19 +178,25 @@ const std::vector<std::vector<TYPE> >& ARG_NAME, std::vector<std::vector<TYPE> >
     temp.resize(size0);
     PyObject* item0;
     PyObject* item1;
+    /* std::cerr << "size0=" << size0 << std::endl; */
     for(Py_ssize_t i=0; i<size0; ++i) {
+      /* std::cerr << "  i=" << i << std::endl; */
       item0 = PySequence_GetItem($input, i);
       Py_ssize_t size1 = PySequence_Size(item0);
       temp[i].resize(size1);
+      /* std::cerr << "    size1=" << size1 << std::endl; */
       for(Py_ssize_t j=0; j<size1; ++j) {
         item1 = PySequence_GetItem(item0, j);
         if(!SWIG_IsOK(SWIG_AsVal(TYPE)(item1, &temp[i][j]))) {
           Py_DECREF(item1);
+          Py_DECREF(item0);
           SWIG_exception(SWIG_TypeError, "expected items of sequence to be sequences of type " \
                          "\"TYPE\" in argument $argnum");
         }
+        /* std::cerr << "      " << j << ": " << temp[i][j] << std::endl; */
         Py_DECREF(item1);
       }
+      Py_DECREF(item0);
     }
   } else {
     SWIG_exception(SWIG_TypeError, "(1) numpy array of 'TYPE_NAME' expected.");
