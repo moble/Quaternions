@@ -94,6 +94,13 @@ else :
                     'Quaternions_typemap.i']
     Libraries = []
 
+try:
+    import getpass
+    if getpass.getuser()=='boyle':
+        Libraries += ['stdc++',]
+except:
+    pass
+
 ## Remove a compiler flag that doesn't belong there for C++
 import distutils.sysconfig as ds
 cfs=ds.get_config_vars()
