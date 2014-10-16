@@ -15,7 +15,7 @@ namespace Quaternions {
 
   /// Object representing an individual quaternion
   class Quaternion {
-  private:
+  public:
     double w, x, y, z;
   public: // Constructors
     Quaternion();

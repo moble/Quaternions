@@ -242,9 +242,9 @@ double& Quaternions::Quaternion::operator[](const unsigned int i) {
 /// Quaternion multiplication.
 Quaternion Quaternions::Quaternion::operator*(const Quaternion& Q) const {
   return Quaternion(w*Q.w - x*Q.x - y*Q.y - z*Q.z,
-            w*Q.x + x*Q.w + y*Q.z - z*Q.y,
-            w*Q.y - x*Q.z + y*Q.w + z*Q.x,
-            w*Q.z + x*Q.y - y*Q.x + z*Q.w);
+                    w*Q.x + x*Q.w + y*Q.z - z*Q.y,
+                    w*Q.y - x*Q.z + y*Q.w + z*Q.x,
+                    w*Q.z + x*Q.y - y*Q.x + z*Q.w);
 }
 
 /// Return logarithm of Quaternion.
