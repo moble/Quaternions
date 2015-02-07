@@ -1,3 +1,4 @@
+
 // Copyright (c) 2014, Michael Boyle
 // See LICENSE file for details
 
@@ -64,6 +65,7 @@ namespace Quaternions {
     inline Quaternion  ParityConjugateSpinor() const { return Quaternion(w, x, y, z); }
     inline double IntrinsicDistance(const Quaternion& that) const { return 2*((*this)*that.inverse()).logRotor().abs(); }
     inline double ChordalDistance(const Quaternion& that) const { return ((*this) - that).abs(); }
+    std::string str() const;
   };
   // Helper (non-member) functions for single Quaternions follow
   inline Quaternion operator+(const double a, const Quaternion& Q) { return Q+a; }

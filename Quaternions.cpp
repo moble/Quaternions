@@ -317,6 +317,13 @@ Quaternion Quaternions::Quaternion::exp() const {
   return Result;
 }
 
+/// Return a space-separated copy of the values
+std::string Quaternions::Quaternion::str() const {
+  std::stringstream ss;
+  ss << w << " " << x << " " << y << " " << z;
+  return ss.str();
+}
+
 /// Print the quaternion nicely to stream
 std::ostream& Quaternions::operator<<(std::ostream& out, const Quaternions::Quaternion& q) {
   out << "[" << q[0] << ", " << q[1] << ", " << q[2] << ", " << q[3] << "]";
