@@ -541,7 +541,7 @@ std::vector<Quaternion> Quaternions::FrameFromZ(const std::vector<Quaternion>& Z
   vector<Quaternion> R(Size);
   // cout << "\tComputing basic frame" << endl;
   for(unsigned int k=0; k<Size; ++k) {
-    R[k] = Quaternions::sqrt(-Z[k]*z);
+    R[k] = Quaternions::sqrtOfRotor(-Z[k]*z);
   }
   // cout << "\tRemoving rotation:" << endl;
   return Quaternions::MinimalRotation(Quaternions::UnflipRotors(R), T, NIterations);
