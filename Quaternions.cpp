@@ -769,14 +769,15 @@ std::vector<Quaternion> Quaternions::Squad(const std::vector<Quaternion>& RIn, c
       Qi = RIn[iIn];
       Qip1 = RIn[iIn+1];
       Qip2 = RIn[iIn+2];
-    } else if(iIn+2==tIn.size()) {
-      Dtim1 = tIn[iIn]-tIn[iIn-1];
-      Dti = tIn[iIn+1]-tIn[iIn];
+    } else if(iIn+2>=tIn.size()) {
+      const unsigned int i=tIn.size()-2;
+      Dtim1 = tIn[i]-tIn[i-1];
+      Dti = tIn[i+1]-tIn[i];
       Dtip1 = Dti;
-      Qim1 = RIn[iIn-1];
-      Qi = RIn[iIn];
-      Qip1 = RIn[iIn+1];
-      Qip2 = RIn[iIn+1]*RIn[iIn].inverse()*RIn[iIn+1];
+      Qim1 = RIn[i-1];
+      Qi = RIn[i];
+      Qip1 = RIn[i+1];
+      Qip2 = RIn[i+1]*RIn[i].inverse()*RIn[i+1];
     } else {
       Dtim1 = tIn[iIn]-tIn[iIn-1];
       Dti = tIn[iIn+1]-tIn[iIn];
