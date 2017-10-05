@@ -1,3 +1,7 @@
+***NOTE:***  This repository is outdated and no longer actively developed.  I maintain a newer package [here](https://github.com/moble/quaternion), which is written in C, but also uses the [numpy](http://www.numpy.org/) C-API for much better integration with python.
+
+
+
 Quaternions
 ===========
 
