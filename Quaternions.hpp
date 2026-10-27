@@ -31,8 +31,8 @@ namespace Quaternions {
     Quaternion& operator+=(const Quaternion& Q) { w+=Q.w; x+=Q.x; y+=Q.y; z+=Q.z; return *this; }
     double operator[](const unsigned int i) const;
     double& operator[](const unsigned int i);
-    inline bool operator!=(const Quaternion& Q) const { if(w!=Q.w) return false; if(x!=Q.x) return false; if(y!=Q.y) return false; if(z!=Q.z) return false; return true; }
-    inline bool operator==(const Quaternion& Q) const { return !((*this) != Q); }
+    inline bool operator==(const Quaternion& Q) const { return w==Q.w && x==Q.x && y==Q.y && z==Q.z; }
+    inline bool operator!=(const Quaternion& Q) const { return !((*this) == Q); }
     inline Quaternion operator-() const { return Quaternion(-w, -x, -y, -z); }
     inline Quaternion operator+(const double t) const { return Quaternion(w+t, x, y, z); }
     inline Quaternion operator-(const double t) const { return Quaternion(w-t, x, y, z); }
